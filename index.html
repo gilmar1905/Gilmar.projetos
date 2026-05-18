@@ -218,4 +218,37 @@
             let invPrincipal = total - montanteGastoProtecao;
             investimentos[o_lucro_alvo] = invPrincipal;
 
-            if (invPrincipal <=
+            if (invPrincipal <= 0) {
+                alert("Erro: Odds insuficientes para cobrir o custo da proteção.");
+                return;
+            }
+
+            odds.forEach(o => {
+                const divRes = document.createElement('div');
+                divRes.className = 'result-item';
+                if (o.num === o_lucro_alvo) {
+                    divRes.classList.add('destaque-lucro');
+                    divRes.innerHTML = `<span>⭐ Investir na Opção ${o.num} (Alvo de Lucro):</span> <span class="info-aposta">R$ ${investimentos[o.num].toFixed(2)}</span>`;
+                } else {
+                    divRes.innerHTML = `<span>Investir na Opção ${o.num} (Proteção):</span> <span class="info-aposta">R$ ${investimentos[o.num].toFixed(2)}</span>`;
+                }
+                listaResultadosApostas.appendChild(divRes);
+            });
+
+            let oddPrincipalAlvo = odds.find(o => o.num === o_lucro_alvo).valor;
+            let retornoPrincipal = investimentos[o_lucro_alvo] * oddPrincipalAlvo;
+            let lucroLiquidoPrincipal = retornoPrincipal - total;
+            let lucroPercentPrincipal = (lucroLiquidoPrincipal / total) * 100;
+            let classeLucroP = lucroLiquidoPrincipal > 0 ? "lucro-positivo" : "lucro-negativo";
+
+            resumoFinalContainer.innerHTML = `
+                <div class="result-item" style="font-size: 16px;"><span>Se der a Opção ${o_lucro_alvo} (Principal):</span><span class="${classeLucroP}">R$ ${retornoPrincipal.toFixed(2)} [Lucro de R$ ${lucroLiquidoPrincipal.toFixed(2)} (${lucroPercentPrincipal.toFixed(2)}%)]</span></div>
+                <div class="result-item" style="font-size: 15px; color: #b0b0b0;"><span>Se der qualquer outra opção (Proteção):</span><span>Retorna o Montante Integrado (R$ ${total.toFixed(2)})</span></div>
+            `;
+        }
+
+        resultadosContainer.style.display = 'block';
+    });
+</script>
+</body>
+</html>
