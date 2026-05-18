@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora Multi-Surebet</title>
+    <title>Calculadora Multi-Surebet com Proteção</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #121212; color: #e0e0e0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
@@ -14,9 +14,11 @@
         input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #2d2d2d; color: #fff; font-size: 16px; outline: none; }
         input:focus { border-color: #00e676; }
         
-        .odds-container { margin-top: 15px; max-height: 300px; overflow-y: auto; padding-right: 5px; }
-        .odd-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .odd-row span { font-size: 14px; color: #b0b0b0; min-width: 65px; }
+        .odds-container { margin-top: 15px; max-height: 350px; overflow-y: auto; padding-right: 5px; }
+        .odd-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; background: #252525; padding: 8px; border-radius: 8px; }
+        .odd-row span { font-size: 14px; color: #b0b0b0; min-width: 60px; }
+        .radio-group { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: #00e676; cursor: pointer; min-width: 50px; }
+        .radio-group input { width: auto; margin-bottom: 3px; cursor: pointer; }
         
         .btn-calc { width: 100%; padding: 14px; background: #00e676; border: none; border-radius: 8px; color: #121212; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.2s; }
         .btn-calc:hover { background: #00c853; }
@@ -27,12 +29,13 @@
         .lucro-positivo { color: #00e676; }
         .lucro-negativo { color: #ff5252; }
         .info-aposta { color: #ffffff; }
+        .destaque-lucro { background: rgba(0, 230, 118, 0.1); padding: 5px; border-radius: 4px; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    <h2>Multi-Surebet Calculator</h2>
+    <h2>Multi-Surebet Pro</h2>
     
     <div class="input-group">
         <label for="qtd_odds">Quantidade de Opções / Odds</label>
@@ -44,6 +47,10 @@
         <input type="number" id="montante" placeholder="Ex: 100" step="any">
     </div>
 
+    <div style="font-size: 13px; color: #00e676; margin-bottom: 5px; font-weight: bold;">
+        Selecione a opção principal para puxar todo o lucro:
+    </div>
+
     <div class="odds-container" id="lista_odds">
         </div>
 
@@ -53,8 +60,8 @@
         <div id="lista_resultados_apostas">
             </div>
         <hr style="border: 0; border-top: 1px dashed #333; margin: 10px 0;">
-        <div class="result-item" style="font-size: 16px;"><span>Retorno Bruto Total:</span><span id="res_retorno" style="color: #fff;">R$ 0,00</span></div>
-        <div class="result-item" style="font-size: 18px;"><span>Lucro Líquido:</span><span id="res_lucro">R$ 0,00</span></div>
+        <div class="result-item" style="font-size: 16px;"><span>Se der a Opção Principal selecionada:</span><span id="res_lucro_principal" class="lucro-positivo">R$ 0,00</span></div>
+        <div class="result-item" style="font-size: 15px; color: #b0b0b0;"><span>Se der qualquer outra opção (Proteção):</span><span>Retorna o Montante (R$ 0,00)</span></div>
     </div>
 </div>
 
@@ -65,7 +72,7 @@
     const resultadosContainer = document.getElementById('resultados');
     const listaResultadosApostas = document.getElementById('lista_resultados_apostas');
 
-    // Preenche o select dinamicamente de 2 até 20 opções
+    // Preenche o select de 2 até 20 opções
     for (let i = 2; i <= 20; i++) {
         let opt = document.createElement('option');
         opt.value = i;
@@ -74,7 +81,7 @@
         qtdOddsSelect.appendChild(opt);
     }
 
-    // Função que gera os inputs de Odds na tela baseada na quantidade escolhida
+    // Gera as linhas com Input + Radio Button para escolher o alvo do lucro
     function gerarInputsOdds() {
         listaOddsContainer.innerHTML = '';
         resultadosContainer.style.display = 'none';
@@ -83,21 +90,25 @@
         for (let i = 1; i <= qtd; i++) {
             const div = document.createElement('div');
             div.className = 'odd-row';
+            
+            // O primeiro radio button já vem marcado por padrão
+            const checked = (i === 1) ? 'checked' : '';
+            
             div.innerHTML = `
                 <span>Opção ${i}:</span>
-                <input type="number" class="odd-input" id="odd_${i}" placeholder="Digite a Odd ${i}" step="any">
+                <input type="number" class="odd-input" id="odd_${i}" placeholder="Odd ${i}" step="any">
+                <label class="radio-group">
+                    <input type="radio" name="opcao_lucro" value="${i}" ${checked}>
+                    Lucro
+                </label>
             `;
             listaOddsContainer.appendChild(div);
         }
     }
 
-    // Inicializa com 2 campos na primeira execução
     gerarInputsOdds();
-
-    // Atualiza os campos sempre que mudar a quantidade no select
     qtdOddsSelect.addEventListener('change', gerarInputsOdds);
 
-    // Lógica do Cálculo Matemático Geral de Arbitragem (Surebet para N opções)
     btnCalcular.addEventListener('click', function() {
         const total = parseFloat(document.getElementById('montante').value);
         if (isNaN(total) || total <= 0) {
@@ -106,52 +117,85 @@
         }
 
         const inputs = document.querySelectorAll('.odd-input');
-        let odds = [];
-        let somaInversos = 0;
+        const opcaoLucroAlvo = parseInt(document.querySelector('input[name="opcao_lucro"]:checked').value);
+        
+        let odds = {};
+        let somaInversosProtecao = 0;
 
-        // Captura e valida as odds digitadas
+        // Captura e valida as odds
         for (let i = 0; i < inputs.length; i++) {
+            const numOpcao = i + 1;
             const valor = parseFloat(inputs[i].value);
             if (isNaN(valor) || valor <= 1) {
-                alert(`Por favor, preencha a Odd da Opção ${i + 1} com um valor válido maior que 1.`);
+                alert(`Por favor, preencha a Odd da Opção ${numOpcao} com um valor válido.`);
                 return;
             }
-            odds.push(valor);
-            somaInversos += (1 / valor);
+            odds[numOpcao] = valor;
+
+            // Soma o inverso apenas das opções de PROTEÇÃO (as que não foram selecionadas para o lucro)
+            if (numOpcao !== opcaoLucroAlvo) {
+                somaInversosProtecao += (1 / valor);
+            }
         }
 
-        // Limpa resultados anteriores
+        // Validação matemática se a proteção não estoura o montante total
+        if (somaInversosProtecao >= 1) {
+            alert("Erro: As odds de proteção são muito baixas. Elas sozinhas consomem mais do que o seu montante total, impossibilitando o lucro na opção principal.");
+            return;
+        }
+
         listaResultadosApostas.innerHTML = '';
+        let investimentos = {};
+        let montanteGastoProtecao = 0;
 
-        // Calcula a distribuição do dinheiro para cada opção
-        // Fórmula básica: Investimento_i = Montante * ( (1/Odd_i) / Soma_De_Todos_Os_Inversos )
-        let retornoEsperado = total / somaInversos;
+        // 1º Passo: Calcula o valor exato para as opções de proteção retornarem exatamente o Montante Total
+        for (let numOpcao in odds) {
+            let n = parseInt(numOpcao);
+            if (n !== opcaoLucroAlvo) {
+                let invProtecao = total / odds[n];
+                investimentos[n] = invProtecao;
+                montanteGastoProtecao += invProtecao;
+            }
+        }
 
-        for (let i = 0; i < odds.length; i++) {
-            let investimentoOpcao = retornoEsperado / odds[i];
-            
+        // 2º Passo: O que sobrou do montante vai inteirinho para a opção principal (lucro alvo)
+        let invPrincipal = total - montanteGastoProtecao;
+        investimentos[opcaoLucroAlvo] = invPrincipal;
+
+        // Se o valor restante for menor ou igual a 0, a surebet com proteção é inválida
+        if (invPrincipal <= 0) {
+            alert("Com essas odds, o custo para se proteger anula qualquer chance de investimento na opção principal.");
+            return;
+        }
+
+        // Mostra a distribuição na tela
+        for (let i = 1; i <= inputs.length; i++) {
             const divRes = document.createElement('div');
             divRes.className = 'result-item';
-            divRes.innerHTML = `
-                <span>Investir na Opção ${i + 1} (Odd ${odds[i].toFixed(2)}):</span>
-                <span class="info-aposta">R$ ${investimentoOpcao.toFixed(2)}</span>
-            `;
+            
+            // Destaca visualmente na lista qual é a opção principal escolhida
+            if (i === opcaoLucroAlvo) {
+                divRes.classList.add('destaque-lucro');
+                divRes.innerHTML = `<span>⭐ Investir na Opção ${i} (Alvo de Lucro):</span> <span class="info-aposta">R$ ${investimentos[i].toFixed(2)}</span>`;
+            } else {
+                divRes.innerHTML = `<span>Investir na Opção ${i} (Proteção):</span> <span class="info-aposta">R$ ${investimentos[i].toFixed(2)}</span>`;
+            }
             listaResultadosApostas.appendChild(divRes);
         }
 
-        // Calcula lucro ou prejuízo da operação
-        const lucro = retornoEsperado - total;
-        const lucroPercent = (lucro / total) * 100;
+        // 3º Passo: Calcula o retorno e lucro caso a opção principal seja a vencedora
+        const retornoPrincipal = investimentos[opcaoLucroAlvo] * odds[opcaoLucroAlvo];
+        const lucroLiquidoPrincipal = retornoPrincipal - total;
+        const lucroPercentPrincipal = (lucroLiquidoPrincipal / total) * 100;
 
-        document.getElementById('res_retorno').innerText = "R$ " + retornoEsperado.toFixed(2);
+        // Atualiza o painel resumo final
+        const painelLucro = document.getElementById('res_lucro_principal');
+        painelLucro.innerText = `R$ ${retornoPrincipal.toFixed(2)} [Lucro de R$ ${lucroLiquidoPrincipal.toFixed(2)} (${lucroPercentPrincipal.toFixed(2)}%)]`;
         
-        const elementoLucro = document.getElementById('res_lucro');
-        elementoLucro.innerText = "R$ " + lucro.toFixed(2) + " (" + lucroPercent.toFixed(2) + "%)";
-        
-        if (lucro > 0) {
-            elementoLucro.className = "lucro-positivo";
+        if (lucroLiquidoPrincipal > 0) {
+            painelLucro.className = "lucro-positivo";
         } else {
-            elementoLucro.className = "lucro-negativo";
+            painelLucro.className = "lucro-negativo";
         }
 
         resultadosContainer.style.display = 'block';
