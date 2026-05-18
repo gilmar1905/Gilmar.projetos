@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora Multi-Surebet com Proteção</title>
+    <title>Calculadora Multi-Surebet Avançada</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #121212; color: #e0e0e0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
@@ -15,9 +15,9 @@
         input:focus { border-color: #00e676; }
         
         .odds-container { margin-top: 15px; max-height: 350px; overflow-y: auto; padding-right: 5px; }
-        .odd-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; background: #252525; padding: 8px; border-radius: 8px; }
+        .odd-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; background: #252525; padding: 8px; border-radius: 8px; transition: 0.3s; }
         .odd-row span { font-size: 14px; color: #b0b0b0; min-width: 60px; }
-        .radio-group { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: #00e676; cursor: pointer; min-width: 50px; }
+        .radio-group { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: #00e676; cursor: pointer; min-width: 50px; opacity: 0.5; transition: 0.3s; }
         .radio-group input { width: auto; margin-bottom: 3px; cursor: pointer; }
         
         .btn-calc { width: 100%; padding: 14px; background: #00e676; border: none; border-radius: 8px; color: #121212; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.2s; }
@@ -29,13 +29,13 @@
         .lucro-positivo { color: #00e676; }
         .lucro-negativo { color: #ff5252; }
         .info-aposta { color: #ffffff; }
-        .destaque-lucro { background: rgba(0, 230, 118, 0.1); padding: 5px; border-radius: 4px; }
+        .destaque-lucro { background: rgba(0, 230, 118, 0.15); padding: 5px; border-radius: 4px; border-left: 3px solid #00e676; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    <h2>Multi-Surebet Pro</h2>
+    <h2>Multi-Surebet Avançada</h2>
     
     <div class="input-group">
         <label for="qtd_odds">Quantidade de Opções / Odds</label>
@@ -43,12 +43,20 @@
     </div>
 
     <div class="input-group">
+        <label for="modo_calculo">Estratégia de Distribuição</label>
+        <select id="modo_calculo">
+            <option value="dividido">Dividir Lucro Igualmente (Surebet Tradicional)</option>
+            <option value="protecao">Concentrar Lucro em 1 Opção (Com Proteção)</option>
+        </select>
+    </div>
+
+    <div class="input-group">
         <label for="montante">Montante Total Disponível (R$)</label>
         <input type="number" id="montante" placeholder="Ex: 100" step="any">
     </div>
 
-    <div style="font-size: 13px; color: #00e676; margin-bottom: 5px; font-weight: bold;">
-        Selecione a opção principal para puxar todo o lucro:
+    <div id="texto_ajuda_radio" style="font-size: 13px; color: #00e676; margin-bottom: 5px; font-weight: bold; display: none;">
+        Selecione qual opção deve puxar todo o lucro:
     </div>
 
     <div class="odds-container" id="lista_odds">
@@ -60,17 +68,20 @@
         <div id="lista_resultados_apostas">
             </div>
         <hr style="border: 0; border-top: 1px dashed #333; margin: 10px 0;">
-        <div class="result-item" style="font-size: 16px;"><span>Se der a Opção Principal selecionada:</span><span id="res_lucro_principal" class="lucro-positivo">R$ 0,00</span></div>
-        <div class="result-item" style="font-size: 15px; color: #b0b0b0;"><span>Se der qualquer outra opção (Proteção):</span><span>Retorna o Montante (R$ 0,00)</span></div>
+        <div id="resumo_final_container">
+            </div>
     </div>
 </div>
 
 <script>
     const qtdOddsSelect = document.getElementById('qtd_odds');
+    const modoCalculoSelect = document.getElementById('modo_calculo');
     const listaOddsContainer = document.getElementById('lista_odds');
     const btnCalcular = document.getElementById('btn_calcular');
     const resultadosContainer = document.getElementById('resultados');
     const listaResultadosApostas = document.getElementById('lista_resultados_apostas');
+    const resumoFinalContainer = document.getElementById('resumo_final_container');
+    const textoAjudaRadio = document.getElementById('texto_ajuda_radio');
 
     // Preenche o select de 2 até 20 opções
     for (let i = 2; i <= 20; i++) {
@@ -81,7 +92,28 @@
         qtdOddsSelect.appendChild(opt);
     }
 
-    // Gera as linhas com Input + Radio Button para escolher o alvo do lucro
+    // Controla a visibilidade visual das bolinhas de lucro baseado no modo escolhido
+    function gerenciarModoVisual() {
+        const modo = modoCalculoSelect.value;
+        const radios = document.querySelectorAll('.radio-group');
+        
+        if (modo === 'protecao') {
+            textoAjudaRadio.style.display = 'block';
+            radios.forEach(r => {
+                r.style.opacity = '1';
+                r.style.pointerEvents = 'auto';
+            });
+        } else {
+            textoAjudaRadio.style.display = 'none';
+            radios.forEach(r => {
+                r.style.opacity = '0.2';
+                r.style.pointerEvents = 'none'; // desativa cliques se estiver no modo dividido
+            });
+        }
+        resultadosContainer.style.display = 'none';
+    }
+
+    // Gera as linhas de inputs dinamicamente
     function gerarInputsOdds() {
         listaOddsContainer.innerHTML = '';
         resultadosContainer.style.display = 'none';
@@ -90,8 +122,6 @@
         for (let i = 1; i <= qtd; i++) {
             const div = document.createElement('div');
             div.className = 'odd-row';
-            
-            // O primeiro radio button já vem marcado por padrão
             const checked = (i === 1) ? 'checked' : '';
             
             div.innerHTML = `
@@ -104,10 +134,12 @@
             `;
             listaOddsContainer.appendChild(div);
         }
+        gerenciarModoVisual();
     }
 
     gerarInputsOdds();
     qtdOddsSelect.addEventListener('change', gerarInputsOdds);
+    modoCalculoSelect.addEventListener('change', gerenciarModoVisual);
 
     btnCalcular.addEventListener('click', function() {
         const total = parseFloat(document.getElementById('montante').value);
@@ -117,89 +149,73 @@
         }
 
         const inputs = document.querySelectorAll('.odd-input');
-        const opcaoLucroAlvo = parseInt(document.querySelector('input[name="opcao_lucro"]:checked').value);
+        const modo = modoCalculoSelect.value;
         
-        let odds = {};
-        let somaInversosProtecao = 0;
-
-        // Captura e valida as odds
-        for (let i = 0; i < inputs.length; i++) {
-            const numOpcao = i + 1;
-            const valor = parseFloat(inputs[i].value);
-            if (isNaN(valor) || valor <= 1) {
-                alert(`Por favor, preencha a Odd da Opção ${numOpcao} com um valor válido.`);
-                return;
-            }
-            odds[numOpcao] = valor;
-
-            // Soma o inverso apenas das opções de PROTEÇÃO (as que não foram selecionadas para o lucro)
-            if (numOpcao !== opcaoLucroAlvo) {
-                somaInversosProtecao += (1 / valor);
-            }
+        let odds = [];
+        let somaInversos = 0;
+        let o_lucro_alvo = 1;
+        
+        if (modo === 'protecao') {
+            o_lucro_alvo = parseInt(document.querySelector('input[name="opcao_lucro"]:checked').value);
         }
 
-        // Validação matemática se a proteção não estoura o montante total
-        if (somaInversosProtecao >= 1) {
-            alert("Erro: As odds de proteção são muito baixas. Elas sozinhas consomem mais do que o seu montante total, impossibilitando o lucro na opção principal.");
-            return;
+        // Captura e validação geral das odds
+        for (let i = 0; i < inputs.length; i++) {
+            const valor = parseFloat(inputs[i].value);
+            if (isNaN(valor) || valor <= 1) {
+                alert(`Por favor, preencha a Odd da Opção ${i + 1} com um valor válido.`);
+                return;
+            }
+            odds.push({ num: i + 1, valor: valor });
+            somaInversos += (1 / valor);
         }
 
         listaResultadosApostas.innerHTML = '';
+        resumoFinalContainer.innerHTML = '';
         let investimentos = {};
-        let montanteGastoProtecao = 0;
 
-        // 1º Passo: Calcula o valor exato para as opções de proteção retornarem exatamente o Montante Total
-        for (let numOpcao in odds) {
-            let n = parseInt(numOpcao);
-            if (n !== opcaoLucroAlvo) {
-                let invProtecao = total / odds[n];
-                investimentos[n] = invProtecao;
-                montanteGastoProtecao += invProtecao;
-            }
-        }
+        if (modo === 'dividido') {
+            // --- MODO 1: LUCRO DIVIDIDO IGUALMENTE (SUREBET CLÁSSICA) ---
+            let retornoBrutoGeral = total / somaInversos;
+            let lucroLiquidoGeral = retornoBrutoGeral - total;
+            let lucroPercentGeral = (lucroLiquidoGeral / total) * 100;
+            let classeLucro = lucroLiquidoGeral > 0 ? "lucro-positivo" : "lucro-negativo";
 
-        // 2º Passo: O que sobrou do montante vai inteirinho para a opção principal (lucro alvo)
-        let invPrincipal = total - montanteGastoProtecao;
-        investimentos[opcaoLucroAlvo] = invPrincipal;
+            odds.forEach(o => {
+                let inv = retornoBrutoGeral / o.valor;
+                const divRes = document.createElement('div');
+                divRes.className = 'result-item';
+                divRes.innerHTML = `<span>Investir na Opção ${o.num} (Odd ${o.valor.toFixed(2)}):</span> <span class="info-aposta">R$ ${inv.toFixed(2)}</span>`;
+                listaResultadosApostas.appendChild(divRes);
+            });
 
-        // Se o valor restante for menor ou igual a 0, a surebet com proteção é inválida
-        if (invPrincipal <= 0) {
-            alert("Com essas odds, o custo para se proteger anula qualquer chance de investimento na opção principal.");
-            return;
-        }
+            resumoFinalContainer.innerHTML = `
+                <div class="result-item" style="font-size: 16px;"><span>Retorno Bruto (Qualquer resultado):</span><span style="color:#fff;">R$ ${retornoBrutoGeral.toFixed(2)}</span></div>
+                <div class="result-item" style="font-size: 18px;"><span>Lucro Líquido Garantido:</span><span class="${classeLucro}">R$ ${lucroLiquidoGeral.toFixed(2)} (${lucroPercentGeral.toFixed(2)}%)</span></div>
+            `;
 
-        // Mostra a distribuição na tela
-        for (let i = 1; i <= inputs.length; i++) {
-            const divRes = document.createElement('div');
-            divRes.className = 'result-item';
-            
-            // Destaca visualmente na lista qual é a opção principal escolhida
-            if (i === opcaoLucroAlvo) {
-                divRes.classList.add('destaque-lucro');
-                divRes.innerHTML = `<span>⭐ Investir na Opção ${i} (Alvo de Lucro):</span> <span class="info-aposta">R$ ${investimentos[i].toFixed(2)}</span>`;
-            } else {
-                divRes.innerHTML = `<span>Investir na Opção ${i} (Proteção):</span> <span class="info-aposta">R$ ${investimentos[i].toFixed(2)}</span>`;
-            }
-            listaResultadosApostas.appendChild(divRes);
-        }
-
-        // 3º Passo: Calcula o retorno e lucro caso a opção principal seja a vencedora
-        const retornoPrincipal = investimentos[opcaoLucroAlvo] * odds[opcaoLucroAlvo];
-        const lucroLiquidoPrincipal = retornoPrincipal - total;
-        const lucroPercentPrincipal = (lucroLiquidoPrincipal / total) * 100;
-
-        // Atualiza o painel resumo final
-        const painelLucro = document.getElementById('res_lucro_principal');
-        painelLucro.innerText = `R$ ${retornoPrincipal.toFixed(2)} [Lucro de R$ ${lucroLiquidoPrincipal.toFixed(2)} (${lucroPercentPrincipal.toFixed(2)}%)]`;
-        
-        if (lucroLiquidoPrincipal > 0) {
-            painelLucro.className = "lucro-positivo";
         } else {
-            painelLucro.className = "lucro-negativo";
-        }
+            // --- MODO 2: CONCENTRAR LUCRO COM PROTEÇÃO ---
+            let somaInversosProtecao = 0;
+            odds.forEach(o => {
+                if (o.num !== o_lucro_alvo) somaInversosProtecao += (1 / o.valor);
+            });
 
-        resultadosContainer.style.display = 'block';
-    });
-</script>
-</body>
-</html>
+            if (somaInversosProtecao >= 1) {
+                alert("Erro: As odds de proteção consomem todo o montante. Lucro impossível.");
+                return;
+            }
+
+            let montanteGastoProtecao = 0;
+            odds.forEach(o => {
+                if (o.num !== o_lucro_alvo) {
+                    let invProt = total / o.valor;
+                    investimentos[o.num] = invProt;
+                    montanteGastoProtecao += invProt;
+                }
+            });
+
+            let invPrincipal = total - montanteGastoProtecao;
+            investimentos[o_lucro_alvo] = invPrincipal;
+
+            if (invPrincipal <=
