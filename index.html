@@ -3,87 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora Multi-Surebet Avançada</title>
+    <title>Surebet & Trix Calculator</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #121212; color: #e0e0e0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        body { background-color: #121212; color: #e0e0e0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
         .app-container { width: 100%; max-width: 500px; background: #1e1e1e; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin-top: 10px; }
-        h2 { text-align: center; margin-bottom: 20px; color: #00e676; font-size: 24px; }
-        .input-group { margin-bottom: 15px; }
+        
+        /* Abas de Navegação */
+        .tabs { display: flex; width: 100%; margin-bottom: 20px; border-bottom: 2px solid #333; gap: 5px; }
+        .tab-btn { flex: 1; padding: 12px; background: #252525; border: none; color: #b0b0b0; font-size: 14px; font-weight: bold; cursor: pointer; border-radius: 8px 8px 0 0; transition: 0.2s; }
+        .tab-btn.active { background: #00e676; color: #121212; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        h2 { text-align: center; margin-bottom: 15px; color: #00e676; font-size: 22px; }
+        .input-group { margin-bottom: 12px; }
         label { display: block; margin-bottom: 5px; font-size: 14px; color: #b0b0b0; }
         input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #2d2d2d; color: #fff; font-size: 16px; outline: none; }
         input:focus { border-color: #00e676; }
         
-        .odds-container { margin-top: 15px; max-height: 350px; overflow-y: auto; padding-right: 5px; }
-        .odd-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; background: #252525; padding: 8px; border-radius: 8px; transition: 0.3s; }
+        /* Estilos Surebet */
+        .odds-container { margin-top: 10px; max-height: 280px; overflow-y: auto; padding-right: 5px; }
+        .odd-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; background: #252525; padding: 10px; border-radius: 8px; }
         .odd-row span { font-size: 14px; color: #b0b0b0; min-width: 60px; }
-        .radio-group { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: #00e676; cursor: pointer; min-width: 50px; opacity: 0.5; transition: 0.3s; }
-        .radio-group input { width: auto; margin-bottom: 3px; cursor: pointer; }
+        .check-group { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: #00e676; cursor: pointer; min-width: 60px; user-select: none; }
+        .check-group input { width: 18px; height: 18px; margin-bottom: 3px; cursor: pointer; accent-color: #00e676; }
         
+        /* Estilos Comuns */
         .btn-calc { width: 100%; padding: 14px; background: #00e676; border: none; border-radius: 8px; color: #121212; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.2s; }
         .btn-calc:hover { background: #00c853; }
         
-        .results { margin-top: 25px; padding-top: 20px; border-top: 1px solid #333; display: none; }
+        .results { margin-top: 20px; padding-top: 15px; border-top: 1px solid #333; display: none; }
         .result-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #2d2d2d; font-size: 15px; }
         .result-item span:last-child { font-weight: bold; }
         .lucro-positivo { color: #00e676; }
         .lucro-negativo { color: #ff5252; }
         .info-aposta { color: #ffffff; }
-        .destaque-lucro { background: rgba(0, 230, 118, 0.15); padding: 5px; border-radius: 4px; border-left: 3px solid #00e676; }
+        .destaque-lucro { background: rgba(0, 230, 118, 0.12); padding: 5px; border-radius: 4px; border-left: 3px solid #00e676; }
+        .destaque-protecao { background: rgba(255, 255, 255, 0.03); padding: 5px; border-radius: 4px; border-left: 3px solid #888; }
+        .subtitulo-resumo { font-size: 15px; color: #00e676; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    <h2>Multi-Surebet Avançada</h2>
-    
-    <div class="input-group">
-        <label for="qtd_odds">Quantidade de Opções / Odds</label>
-        <select id="qtd_odds"></select>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('surebet_tab')">Multi-Surebet</button>
+        <button class="tab-btn" onclick="switchTab('trix_tab')">Sistema Trix</button>
     </div>
 
-    <div class="input-group">
-        <label for="modo_calculo">Estratégia de Distribuição</label>
-        <select id="modo_calculo">
-            <option value="dividido">Dividir Lucro Igualmente (Surebet Tradicional)</option>
-            <option value="protecao">Concentrar Lucro em 1 Opção (Com Proteção)</option>
-        </select>
-    </div>
-
-    <div class="input-group">
-        <label for="montante">Montante Total Disponível (R$)</label>
-        <input type="number" id="montante" placeholder="Ex: 100" step="any">
-    </div>
-
-    <div id="texto_ajuda_radio" style="font-size: 13px; color: #00e676; margin-bottom: 5px; font-weight: bold; display: none;">
-        Selecione qual opção deve puxar todo o lucro:
-    </div>
-
-    <div class="odds-container" id="lista_odds">
+    <div id="surebet_tab" class="tab-content active">
+        <h2>Multi-Surebet Avançada</h2>
+        
+        <div class="input-group">
+            <label for="qtd_odds">Quantidade de Opções / Odds</label>
+            <select id="qtd_odds"></select>
         </div>
 
-    <button class="btn-calc" id="btn_calcular">Calcular Proporções</button>
+        <div class="input-group">
+            <label for="montante_sb">Montante Total Disponível (R$)</label>
+            <input type="number" id="montante_sb" placeholder="Ex: 100" step="any">
+        </div>
 
-    <div class="results" id="resultados">
-        <div id="lista_resultados_apostas">
+        <div style="font-size: 12px; color: #00e676; margin-bottom: 8px; font-weight: bold; text-align: center;">
+            Marque quem divide o Lucro. Desmarcadas viram Proteção.<br>
+            <span style="color: #b0b0b0; font-weight: normal;">(Se nenhuma for marcada, divide igualmente entre todas)</span>
+        </div>
+
+        <div class="odds-container" id="lista_odds_sb">
             </div>
-        <hr style="border: 0; border-top: 1px dashed #333; margin: 10px 0;">
-        <div id="resumo_final_container">
-            </div>
+
+        <button class="btn-calc" id="btn_calc_sb">Calcular Surebet</button>
+
+        <div class="results" id="res_sb">
+            <div id="lista_res_apostas_sb"></div>
+            <hr style="border: 0; border-top: 1px dashed #333; margin: 10px 0;">
+            <div id="resumo_final_sb"></div>
+        </div>
+    </div>
+
+    <div id="trix_tab" class="tab-content">
+        <h2>Calculadora de Sistema Trix</h2>
+        <div style="font-size: 12px; color: #b0b0b0; margin-bottom: 15px; text-align: center;">
+            Insira 3 seleções independentes. O montante será dividido igualmente entre as 4 apostas (3 Duplas e 1 Tripla).
+        </div>
+
+        <div class="input-group">
+            <label for="montante_trix">Montante Total da Trix (R$)</label>
+            <input type="number" id="montante_trix" placeholder="Ex: 40 (será R$ 10 por aposta)" step="any">
+        </div>
+
+        <div class="input-group"><label>Odd - Seleção 1</label><input type="number" id="trix_odd1" placeholder="Ex: 2.00" step="any"></div>
+        <div class="input-group"><label>Odd - Seleção 2</label><input type="number" id="trix_odd2" placeholder="Ex: 2.50" step="any"></div>
+        <div class="input-group"><label>Odd - Seleção 3</label><input type="number" id="trix_odd3" placeholder="Ex: 3.00" step="any"></div>
+
+        <button class="btn-calc" id="btn_calc_trix">Calcular Trix</button>
+
+        <div class="results" id="res_trix">
+            <div class="subtitulo-resumo">Divisão do Investimento (4 apostas):</div>
+            <div class="result-item"><span>Cada parte (Valor por coluna):</span><span id="trix_val_unidade" class="info-aposta">R$ 0,00</span></div>
+            <div class="result-item"><span>Dupla 1 (Seleção 1 x 2) - Custo:</span><span id="trix_c_d1" class="info-aposta">R$ 0,00</span></div>
+            <div class="result-item"><span>Dupla 2 (Seleção 1 x 3) - Custo:</span><span id="trix_c_d2" class="info-aposta">R$ 0,00</span></div>
+            <div class="result-item"><span>Dupla 3 (Seleção 2 x 3) - Custo:</span><span id="trix_c_d3" class="info-aposta">R$ 0,00</span></div>
+            <div class="result-item"><span>Tripla (Seleção 1 x 2 x 3) - Custo:</span><span id="trix_c_t" class="info-aposta">R$ 0,00</span></div>
+            
+            <hr style="border: 0; border-top: 1px dashed #333; margin: 10px 0;">
+            <div class="subtitulo-resumo">Simulação de Retornos:</div>
+            <div id="trix_simulacoes_retorno"></div>
+        </div>
     </div>
 </div>
 
 <script>
-    const qtdOddsSelect = document.getElementById('qtd_odds');
-    const modoCalculoSelect = document.getElementById('modo_calculo');
-    const listaOddsContainer = document.getElementById('lista_odds');
-    const btnCalcular = document.getElementById('btn_calcular');
-    const resultadosContainer = document.getElementById('resultados');
-    const listaResultadosApostas = document.getElementById('lista_resultados_apostas');
-    const resumoFinalContainer = document.getElementById('resumo_final_container');
-    const textoAjudaRadio = document.getElementById('texto_ajuda_radio');
+    // --- LÓGICA DE NAVEGAÇÃO DAS ABAS ---
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
 
-    // Preenche o select de 2 até 20 opções
+    // --- LÓGICA DA ABA 1: MULTI-SUREBET ---
+    const qtdOddsSelect = document.getElementById('qtd_odds');
+    const listaOddsSb = document.getElementById('lista_odds_sb');
+    const btnCalcSb = document.getElementById('btn_calc_sb');
+    const resSbContainer = document.getElementById('res_sb');
+    const listaResApostasSb = document.getElementById('lista_res_apostas_sb');
+    const resumoFinalSb = document.getElementById('resumo_final_sb');
+
     for (let i = 2; i <= 20; i++) {
         let opt = document.createElement('option');
         opt.value = i;
@@ -92,163 +140,176 @@
         qtdOddsSelect.appendChild(opt);
     }
 
-    // Controla a visibilidade visual das bolinhas de lucro baseado no modo escolhido
-    function gerenciarModoVisual() {
-        const modo = modoCalculoSelect.value;
-        const radios = document.querySelectorAll('.radio-group');
-        
-        if (modo === 'protecao') {
-            textoAjudaRadio.style.display = 'block';
-            radios.forEach(r => {
-                r.style.opacity = '1';
-                r.style.pointerEvents = 'auto';
-            });
-        } else {
-            textoAjudaRadio.style.display = 'none';
-            radios.forEach(r => {
-                r.style.opacity = '0.2';
-                r.style.pointerEvents = 'none'; // desativa cliques se estiver no modo dividido
-            });
-        }
-        resultadosContainer.style.display = 'none';
-    }
-
-    // Gera as linhas de inputs dinamicamente
-    function gerarInputsOdds() {
-        listaOddsContainer.innerHTML = '';
-        resultadosContainer.style.display = 'none';
+    function gerarInputsOddsSb() {
+        listaOddsSb.innerHTML = '';
+        resSbContainer.style.display = 'none';
         const qtd = parseInt(qtdOddsSelect.value);
 
         for (let i = 1; i <= qtd; i++) {
             const div = document.createElement('div');
             div.className = 'odd-row';
-            const checked = (i === 1) ? 'checked' : '';
-            
             div.innerHTML = `
                 <span>Opção ${i}:</span>
-                <input type="number" class="odd-input" id="odd_${i}" placeholder="Odd ${i}" step="any">
-                <label class="radio-group">
-                    <input type="radio" name="opcao_lucro" value="${i}" ${checked}>
+                <input type="number" class="sb-odd-input" id="sb_odd_${i}" placeholder="Odd ${i}" step="any">
+                <label class="check-group">
+                    <input type="checkbox" class="sb-lucro-check" value="${i}">
                     Lucro
                 </label>
             `;
-            listaOddsContainer.appendChild(div);
+            listaOddsSb.appendChild(div);
         }
-        gerenciarModoVisual();
     }
+    gerarInputsOddsSb();
+    qtdOddsSelect.addEventListener('change', gerarInputsOddsSb);
 
-    gerarInputsOdds();
-    qtdOddsSelect.addEventListener('change', gerarInputsOdds);
-    modoCalculoSelect.addEventListener('change', gerenciarModoVisual);
+    btnCalcSb.addEventListener('click', function() {
+        const total = parseFloat(document.getElementById('montante_sb').value);
+        if (isNaN(total) || total <= 0) { alert("Insira um montante válido."); return; }
 
-    btnCalcular.addEventListener('click', function() {
-        const total = parseFloat(document.getElementById('montante').value);
-        if (isNaN(total) || total <= 0) {
-            alert("Por favor, insira um montante total válido.");
+        const inputs = document.querySelectorAll('.sb-odd-input');
+        const checkboxes = document.querySelectorAll('.sb-lucro-check');
+        let odds = [], opcoesLucro = [], opcoesProtecao = [];
+
+        for (let i = 0; i < inputs.length; i++) {
+            const valor = parseFloat(inputs[i].value);
+            if (isNaN(valor) || valor <= 1) { alert(`Preencha a Odd da Opção ${i+1} corretamente.`); return; }
+            let item = { num: i + 1, valor: valor };
+            odds.push(item);
+            if (checkboxes[i].checked) opcoesLucro.push(item); else opcoesProtecao.push(item);
+        }
+
+        if (opcoesLucro.length === 0) { opcoesLucro = [...odds]; opcoesProtecao = []; }
+
+        listaResApostasSb.innerHTML = '';
+        resumoFinalSb.innerHTML = '';
+        let investimentos = {}, montanteGastoProtecao = 0;
+
+        if (opcoesProtecao.length > 0) {
+            opcoesProtecao.forEach(item => {
+                let invProt = total / item.valor;
+                investimentos[item.num] = invProt;
+                montanteGastoProtecao += invProt;
+            });
+        }
+
+        if (montanteGastoProtecao >= total) { alert("Custo de proteção esgotou o montante. Lucro impossível."); return; }
+
+        let bancaRestante = total - montanteGastoProtecao;
+        let somaInversosLucro = 0;
+        opcoesLucro.forEach(item => somaInversosLucro += (1 / item.valor));
+        let retornoAlvoLucro = bancaRestante / somaInversosLucro;
+
+        opcoesLucro.forEach(item => investimentos[item.num] = retornoAlvoLucro / item.valor);
+
+        for (let i = 1; i <= inputs.length; i++) {
+            const divRes = document.createElement('div');
+            divRes.className = 'result-item';
+            let ehLucro = opcoesLucro.some(item => item.num === i);
+            if (ehLucro) {
+                divRes.classList.add('destaque-lucro');
+                divRes.innerHTML = `<span>⭐ Opção ${i} (Divisão de Lucro):</span> <span class="info-aposta">R$ ${investimentos[i].toFixed(2)}</span>`;
+            } else {
+                divRes.classList.add('destaque-protecao');
+                divRes.innerHTML = `<span>Opção ${i} (Apenas Proteção):</span> <span class="info-aposta">R$ ${investimentos[i].toFixed(2)}</span>`;
+            }
+            listaResApostasSb.appendChild(divRes);
+        }
+
+        let lucroReal = retornoAlvoLucro - total;
+        let lucroPercent = (lucroReal / total) * 100;
+        let classeLucro = lucroReal > 0 ? "lucro-positivo" : "lucro-negativo";
+
+        if (opcoesProtecao.length === 0) {
+            resumoFinalSb.innerHTML = `<div class="result-item" style="font-size: 16px;"><span>Lucro Seguro Geral:</span><span class="${classeLucro}">R$ ${lucroReal.toFixed(2)} (${lucroPercent.toFixed(2)}%)</span></div>`;
+        } else {
+            resumoFinalSb.innerHTML = `
+                <div class="result-item" style="font-size: 15px;"><span>Se der alguma marcada (Lucro):</span><span class="${classeLucro}">Retorno R$ ${retornoAlvoLucro.toFixed(2)} [Lucro: R$ ${lucroReal.toFixed(2)} (${lucroPercent.toFixed(2)}%)]</span></div>
+                <div class="result-item" style="font-size: 14px; color: #b0b0b0;"><span>Se der alguma desmarcada:</span><span>Retorna o Montante: R$ ${total.toFixed(2)}</span></div>
+            `;
+        }
+        resSbContainer.style.display = 'block';
+    });
+
+    // --- LÓGICA DA ABA 2: CALCULADORA TRIX ---
+    const btnCalcTrix = document.getElementById('btn_calc_trix');
+    const resTrixContainer = document.getElementById('res_trix');
+
+    btnCalcTrix.addEventListener('click', function() {
+        const total = parseFloat(document.getElementById('montante_trix').value);
+        const o1 = parseFloat(document.getElementById('trix_odd1').value);
+        const o2 = parseFloat(document.getElementById('trix_odd2').value);
+        const o3 = parseFloat(document.getElementById('trix_odd3').value);
+
+        if(isNaN(total) || isNaN(o1) || isNaN(o2) || isNaN(o3) || total <= 0) {
+            alert("Por favor, preencha o montante e as 3 odds corretamente.");
             return;
         }
 
-        const inputs = document.querySelectorAll('.odd-input');
-        const modo = modoCalculoSelect.value;
+        // Sistema Trix é composto por 4 apostas de igual valor (3 duplas e 1 tripla)
+        let apostaPorColuna = total / 4;
+
+        // Atualiza divisão na tela
+        document.getElementById('trix_val_unidade').innerText = "R$ " + apostaPorColuna.toFixed(2);
+        document.getElementById('trix_c_d1').innerText = "R$ " + apostaPorColuna.toFixed(2);
+        document.getElementById('trix_c_d2').innerText = "R$ " + apostaPorColuna.toFixed(2);
+        document.getElementById('trix_c_d3').innerText = "R$ " + apostaPorColuna.toFixed(2);
+        document.getElementById('trix_c_t').innerText = "R$ " + apostaPorColuna.toFixed(2);
+
+        // Cálculo das odds combinadas
+        let oddDupla1 = o1 * o2;
+        let oddDupla2 = o1 * o3;
+        let oddDupla3 = o2 * o3;
+        let oddTripla = o1 * o2 * o3;
+
+        // Retornos Brutos individuais
+        let retD1 = apostaPorColuna * oddDupla1;
+        let retD2 = apostaPorColuna * oddDupla2;
+        let retD3 = apostaPorColuna * oddDupla3;
+        let retTripla = apostaPorColuna * oddTripla;
+
+        const simulacoesDiv = document.getElementById('trix_simulacoes_retorno');
+        simulacoesDiv.innerHTML = '';
+
+        // Cenários de Acerto:
+        // Cenário A: Acertar apenas 1 e 2
+        let lucroA = retD1 - total;
+        criarItemSimulacao(simulacoesDiv, "Acertando apenas Seleções 1 e 2:", retD1, lucroA);
+
+        // Cenário B: Acertar apenas 1 e 3
+        let lucroB = retD2 - total;
+        criarItemSimulacao(simulacoesDiv, "Acertando apenas Seleções 1 e 3:", retD2, lucroB);
+
+        // Cenário C: Acertar apenas 2 e 3
+        let lucroC = retD3 - total;
+        criarItemSimulacao(simulacoesDiv, "Acertando apenas Seleções 2 e 3:", retD3, lucroC);
+
+        // Cenário Máximo: Acertar as 3 Seleções (Ganha tudo: as 3 duplas + a tripla)
+        let retornoMaximo = retD1 + retD2 + retD3 + retTripla;
+        let lucroMaximo = retornoMaximo - total;
         
-        let odds = [];
-        let somaInversos = 0;
-        let o_lucro_alvo = 1;
+        const divMax = document.createElement('div');
+        divMax.className = 'result-item';
+        divMax.style.marginTop = '10px';
+        divMax.style.background = 'rgba(0, 230, 118, 0.15)';
+        divMax.style.padding = '8px';
+        divMax.style.borderRadius = '5px';
+        divMax.style.border = '1px dashed #00e676';
         
-        if (modo === 'protecao') {
-            o_lucro_alvo = parseInt(document.querySelector('input[name="opcao_lucro"]:checked').value);
-        }
+        let classeMax = lucroMaximo > 0 ? "lucro-positivo" : "lucro-negativo";
+        divMax.innerHTML = `<span>🏆 ACERTANDO AS 3 SELEÇÕES (GREEN MÁXIMO):</span> <span class="${classeMax}">R$ ${retornoMaximo.toFixed(2)} (Lucro: R$ ${lucroMaximo.toFixed(2)})</span>`;
+        simulacoesDiv.appendChild(divMax);
 
-        // Captura e validação geral das odds
-        for (let i = 0; i < inputs.length; i++) {
-            const valor = parseFloat(inputs[i].value);
-            if (isNaN(valor) || valor <= 1) {
-                alert(`Por favor, preencha a Odd da Opção ${i + 1} com um valor válido.`);
-                return;
-            }
-            odds.push({ num: i + 1, valor: valor });
-            somaInversos += (1 / valor);
-        }
-
-        listaResultadosApostas.innerHTML = '';
-        resumoFinalContainer.innerHTML = '';
-        let investimentos = {};
-
-        if (modo === 'dividido') {
-            // --- MODO 1: LUCRO DIVIDIDO IGUALMENTE (SUREBET CLÁSSICA) ---
-            let retornoBrutoGeral = total / somaInversos;
-            let lucroLiquidoGeral = retornoBrutoGeral - total;
-            let lucroPercentGeral = (lucroLiquidoGeral / total) * 100;
-            let classeLucro = lucroLiquidoGeral > 0 ? "lucro-positivo" : "lucro-negativo";
-
-            odds.forEach(o => {
-                let inv = retornoBrutoGeral / o.valor;
-                const divRes = document.createElement('div');
-                divRes.className = 'result-item';
-                divRes.innerHTML = `<span>Investir na Opção ${o.num} (Odd ${o.valor.toFixed(2)}):</span> <span class="info-aposta">R$ ${inv.toFixed(2)}</span>`;
-                listaResultadosApostas.appendChild(divRes);
-            });
-
-            resumoFinalContainer.innerHTML = `
-                <div class="result-item" style="font-size: 16px;"><span>Retorno Bruto (Qualquer resultado):</span><span style="color:#fff;">R$ ${retornoBrutoGeral.toFixed(2)}</span></div>
-                <div class="result-item" style="font-size: 18px;"><span>Lucro Líquido Garantido:</span><span class="${classeLucro}">R$ ${lucroLiquidoGeral.toFixed(2)} (${lucroPercentGeral.toFixed(2)}%)</span></div>
-            `;
-
-        } else {
-            // --- MODO 2: CONCENTRAR LUCRO COM PROTEÇÃO ---
-            let somaInversosProtecao = 0;
-            odds.forEach(o => {
-                if (o.num !== o_lucro_alvo) somaInversosProtecao += (1 / o.valor);
-            });
-
-            if (somaInversosProtecao >= 1) {
-                alert("Erro: As odds de proteção consomem todo o montante. Lucro impossível.");
-                return;
-            }
-
-            let montanteGastoProtecao = 0;
-            odds.forEach(o => {
-                if (o.num !== o_lucro_alvo) {
-                    let invProt = total / o.valor;
-                    investimentos[o.num] = invProt;
-                    montanteGastoProtecao += invProt;
-                }
-            });
-
-            let invPrincipal = total - montanteGastoProtecao;
-            investimentos[o_lucro_alvo] = invPrincipal;
-
-            if (invPrincipal <= 0) {
-                alert("Erro: Odds insuficientes para cobrir o custo da proteção.");
-                return;
-            }
-
-            odds.forEach(o => {
-                const divRes = document.createElement('div');
-                divRes.className = 'result-item';
-                if (o.num === o_lucro_alvo) {
-                    divRes.classList.add('destaque-lucro');
-                    divRes.innerHTML = `<span>⭐ Investir na Opção ${o.num} (Alvo de Lucro):</span> <span class="info-aposta">R$ ${investimentos[o.num].toFixed(2)}</span>`;
-                } else {
-                    divRes.innerHTML = `<span>Investir na Opção ${o.num} (Proteção):</span> <span class="info-aposta">R$ ${investimentos[o.num].toFixed(2)}</span>`;
-                }
-                listaResultadosApostas.appendChild(divRes);
-            });
-
-            let oddPrincipalAlvo = odds.find(o => o.num === o_lucro_alvo).valor;
-            let retornoPrincipal = investimentos[o_lucro_alvo] * oddPrincipalAlvo;
-            let lucroLiquidoPrincipal = retornoPrincipal - total;
-            let lucroPercentPrincipal = (lucroLiquidoPrincipal / total) * 100;
-            let classeLucroP = lucroLiquidoPrincipal > 0 ? "lucro-positivo" : "lucro-negativo";
-
-            resumoFinalContainer.innerHTML = `
-                <div class="result-item" style="font-size: 16px;"><span>Se der a Opção ${o_lucro_alvo} (Principal):</span><span class="${classeLucroP}">R$ ${retornoPrincipal.toFixed(2)} [Lucro de R$ ${lucroLiquidoPrincipal.toFixed(2)} (${lucroPercentPrincipal.toFixed(2)}%)]</span></div>
-                <div class="result-item" style="font-size: 15px; color: #b0b0b0;"><span>Se der qualquer outra opção (Proteção):</span><span>Retorna o Montante Integrado (R$ ${total.toFixed(2)})</span></div>
-            `;
-        }
-
-        resultadosContainer.style.display = 'block';
+        resTrixContainer.style.display = 'block';
     });
+
+    function criarItemSimulacao(container, texto, retorno, lucro) {
+        const div = document.createElement('div');
+        div.className = 'result-item';
+        let classeLucro = lucro > 0 ? "lucro-positivo" : "lucro-negativo";
+        let sinalLucro = lucro >= 0 ? "Lucro: R$ " : "Prejuízo: R$ ";
+        div.innerHTML = `<span>${texto}</span> <span class="${classeLucro}">R$ ${retorno.toFixed(2)} (${sinalLucro}${Math.abs(lucro).toFixed(2)})</span>`;
+        container.appendChild(div);
+    }
 </script>
 </body>
 </html>
