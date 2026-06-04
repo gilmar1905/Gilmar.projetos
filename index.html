@@ -3,45 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Surebet & Trix Calculator</title>
+    <title>Surebet & Trix Pro Calculator v2</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #121212; color: #e0e0e0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
-        .app-container { width: 100%; max-width: 500px; background: #1e1e1e; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin-top: 10px; }
+        body { background-color: #0c0f12; color: #e2e8f0; padding: 12px; display: flex; flex-direction: column; align-items: center; }
+        .app-container { width: 100%; max-width: 480px; background: #151a22; padding: 18px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); margin-top: 5px; border: 1px solid #222c3a; }
         
         /* Abas de Navegação */
-        .tabs { display: flex; width: 100%; margin-bottom: 20px; border-bottom: 2px solid #333; gap: 5px; }
-        .tab-btn { flex: 1; padding: 12px; background: #252525; border: none; color: #b0b0b0; font-size: 14px; font-weight: bold; cursor: pointer; border-radius: 8px 8px 0 0; transition: 0.2s; }
-        .tab-btn.active { background: #00e676; color: #121212; }
+        .tabs { display: flex; width: 100%; margin-bottom: 15px; border-bottom: 2px solid #222c3a; gap: 4px; }
+        .tab-btn { flex: 1; padding: 10px; background: #1c232e; border: none; color: #94a3b8; font-size: 13px; font-weight: bold; cursor: pointer; border-radius: 8px 8px 0 0; transition: 0.2s; }
+        .tab-btn.active { background: #00e676; color: #0c0f12; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        h2 { text-align: center; margin-bottom: 15px; color: #00e676; font-size: 22px; }
-        .input-group { margin-bottom: 12px; }
-        label { display: block; margin-bottom: 5px; font-size: 14px; color: #b0b0b0; }
-        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #2d2d2d; color: #fff; font-size: 16px; outline: none; }
+        h2 { text-align: center; margin-bottom: 12px; color: #00e676; font-size: 20px; }
+        .input-group { margin-bottom: 10px; }
+        label { display: block; margin-bottom: 4px; font-size: 13px; color: #94a3b8; }
+        input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #222c3a; background: #1c2330; color: #fff; font-size: 15px; outline: none; transition: 0.2s; }
         input:focus { border-color: #00e676; }
         
-        /* Estilos Surebet */
-        .odds-container { margin-top: 10px; max-height: 280px; overflow-y: auto; padding-right: 5px; }
-        .odd-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; background: #252525; padding: 10px; border-radius: 8px; }
-        .odd-row span { font-size: 14px; color: #b0b0b0; min-width: 60px; }
-        .check-group { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: #00e676; cursor: pointer; min-width: 60px; user-select: none; }
-        .check-group input { width: 18px; height: 18px; margin-bottom: 3px; cursor: pointer; accent-color: #00e676; }
+        .action-row { display: flex; gap: 8px; margin-top: 10px; }
+        .btn-secondary { flex: 1; padding: 10px; background: #222c3a; border: none; border-radius: 8px; color: #cbd5e1; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-secondary:hover { background: #2d394b; }
+
+        /* Estilos Linhas de Odds */
+        .odds-container { margin-top: 8px; max-height: 240px; overflow-y: auto; padding-right: 4px; }
+        .odd-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; background: #1c2330; padding: 8px; border-radius: 8px; border: 1px solid #222c3a; }
+        .odd-row span { font-size: 13px; color: #94a3b8; min-width: 55px; }
+        .check-group { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: #00e676; cursor: pointer; min-width: 55px; user-select: none; }
+        .check-group input { width: 16px; height: 16px; margin-bottom: 2px; cursor: pointer; accent-color: #00e676; }
         
-        /* Estilos Comuns */
-        .btn-calc { width: 100%; padding: 14px; background: #00e676; border: none; border-radius: 8px; color: #121212; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.2s; }
+        .btn-calc { width: 100%; padding: 12px; background: #00e676; border: none; border-radius: 8px; color: #0c0f12; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 12px; transition: 0.2s; }
         .btn-calc:hover { background: #00c853; }
         
-        .results { margin-top: 20px; padding-top: 15px; border-top: 1px solid #333; display: none; }
-        .result-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #2d2d2d; font-size: 15px; }
+        /* Resultados com Inputs Editáveis */
+        .results { margin-top: 15px; padding: 12px; border-radius: 10px; background: #1c2330; border: 1px solid #222c3a; display: none; position: relative; }
+        .surebet-alerta-true { border: 1px solid #eab308; background: linear-gradient(135deg, #1c2330 0%, #232215 100%); }
+        .result-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #222c3a; font-size: 14px; }
+        .result-item:last-child { border-bottom: none; }
         .result-item span:last-child { font-weight: bold; }
-        .lucro-positivo { color: #00e676; }
-        .lucro-negativo { color: #ff5252; }
+        
+        /* Inputs de ajuste manual */
+        .input-ajuste { width: 90px; padding: 6px; border-radius: 6px; background: #151a22; border: 1px solid #3b485d; color: #00e676; font-weight: bold; text-align: right; font-size: 14px; }
+        .input-ajuste:focus { border-color: #00e676; }
+
+        .lucro-positivo { color: #00e676; font-size: 16px; font-weight: bold; }
+        .lucro-negativo { color: #f43f5e; font-size: 16px; font-weight: bold; }
         .info-aposta { color: #ffffff; }
-        .destaque-lucro { background: rgba(0, 230, 118, 0.12); padding: 5px; border-radius: 4px; border-left: 3px solid #00e676; }
-        .destaque-protecao { background: rgba(255, 255, 255, 0.03); padding: 5px; border-radius: 4px; border-left: 3px solid #888; }
-        .subtitulo-resumo { font-size: 15px; color: #00e676; font-weight: bold; margin-top: 10px; }
+        .destaque-lucro { background: rgba(0, 230, 118, 0.08); padding: 4px 6px; border-radius: 4px; border-left: 3px solid #00e676; }
+        .destaque-protecao { background: rgba(255, 255, 255, 0.02); padding: 4px 6px; border-radius: 4px; border-left: 3px solid #64748b; }
+        .subtitulo-resumo { font-size: 14px; color: #00e676; font-weight: bold; margin-top: 8px; }
+        
+        /* Histórico */
+        .history-list { max-height: 400px; overflow-y: auto; margin-top: 10px; }
+        .history-item { background: #1c2330; padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #222c3a; font-size: 13px; position: relative; }
+        .history-header { display: flex; justify-content: space-between; color: #00e676; font-weight: bold; margin-bottom: 4px; }
+        .btn-delete-hist { background: #f43f5e; color: white; border: none; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 11px; }
     </style>
 </head>
 <body>
@@ -50,6 +67,7 @@
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('surebet_tab')">Multi-Surebet</button>
         <button class="tab-btn" onclick="switchTab('trix_tab')">Sistema Trix</button>
+        <button class="tab-btn" onclick="switchTab('history_tab')">Histórico</button>
     </div>
 
     <div id="surebet_tab" class="tab-content active">
@@ -62,35 +80,42 @@
 
         <div class="input-group">
             <label for="montante_sb">Montante Total Disponível (R$)</label>
-            <input type="number" id="montante_sb" placeholder="Ex: 100" step="any">
+            <input type="number" id="montante_sb" placeholder="Ex: 10.00" step="any">
         </div>
 
-        <div style="font-size: 12px; color: #00e676; margin-bottom: 8px; font-weight: bold; text-align: center;">
+        <div style="font-size: 11px; color: #00e676; margin-bottom: 6px; text-align: center; font-weight: 500;">
             Marque quem divide o Lucro. Desmarcadas viram Proteção.<br>
-            <span style="color: #b0b0b0; font-weight: normal;">(Se nenhuma for marcada, divide igualmente entre todas)</span>
+            <span style="color: #94a3b8; font-weight: normal;">(Se nenhuma for marcada, divide igualmente)</span>
         </div>
 
-        <div class="odds-container" id="lista_odds_sb">
-            </div>
+        <div class="odds-container" id="lista_odds_sb"></div>
 
         <button class="btn-calc" id="btn_calc_sb">Calcular Surebet</button>
+        <div class="action-row">
+            <button class="btn-secondary" id="btn_clear_sb">Limpar</button>
+            <button class="btn-secondary" id="btn_copy_sb" style="display:none;">Copiar Texto</button>
+            <button class="btn-secondary" id="btn_save_sb" style="display:none;">Salvar</button>
+        </div>
 
         <div class="results" id="res_sb">
+            <div style="font-size: 11px; color: #eab308; margin-bottom: 6px; text-align: center; font-weight: bold;">
+                💡 Você pode alterar os valores em R$ abaixo para corrigir mínimos da banca!
+            </div>
             <div id="lista_res_apostas_sb"></div>
-            <hr style="border: 0; border-top: 1px dashed #333; margin: 10px 0;">
+            <hr style="border: 0; border-top: 1px dashed #222c3a; margin: 8px 0;">
             <div id="resumo_final_sb"></div>
         </div>
     </div>
 
     <div id="trix_tab" class="tab-content">
         <h2>Calculadora de Sistema Trix</h2>
-        <div style="font-size: 12px; color: #b0b0b0; margin-bottom: 15px; text-align: center;">
-            Insira 3 seleções independentes. O montante será dividido igualmente entre as 4 apostas (3 Duplas e 1 Tripla).
+        <div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px; text-align: center;">
+            Insira 3独立 seleções. O montante será dividido igualmente em 4 colunas (3 Duplas e 1 Tripla).
         </div>
 
         <div class="input-group">
             <label for="montante_trix">Montante Total da Trix (R$)</label>
-            <input type="number" id="montante_trix" placeholder="Ex: 40 (será R$ 10 por aposta)" step="any">
+            <input type="number" id="montante_trix" placeholder="Ex: 40" step="any">
         </div>
 
         <div class="input-group"><label>Odd - Seleção 1</label><input type="number" id="trix_odd1" placeholder="Ex: 2.00" step="any"></div>
@@ -98,44 +123,60 @@
         <div class="input-group"><label>Odd - Seleção 3</label><input type="number" id="trix_odd3" placeholder="Ex: 3.00" step="any"></div>
 
         <button class="btn-calc" id="btn_calc_trix">Calcular Trix</button>
+        <div class="action-row">
+            <button class="btn-secondary" id="btn_clear_trix">Limpar</button>
+            <button class="btn-secondary" id="btn_copy_trix" style="display:none;">Copiar Texto</button>
+            <button class="btn-secondary" id="btn_save_trix" style="display:none;">Salvar</button>
+        </div>
 
         <div class="results" id="res_trix">
             <div class="subtitulo-resumo">Divisão do Investimento (4 apostas):</div>
             <div class="result-item"><span>Cada parte (Valor por coluna):</span><span id="trix_val_unidade" class="info-aposta">R$ 0,00</span></div>
-            <div class="result-item"><span>Dupla 1 (Seleção 1 x 2) - Custo:</span><span id="trix_c_d1" class="info-aposta">R$ 0,00</span></div>
-            <div class="result-item"><span>Dupla 2 (Seleção 1 x 3) - Custo:</span><span id="trix_c_d2" class="info-aposta">R$ 0,00</span></div>
-            <div class="result-item"><span>Dupla 3 (Seleção 2 x 3) - Custo:</span><span id="trix_c_d3" class="info-aposta">R$ 0,00</span></div>
-            <div class="result-item"><span>Tripla (Seleção 1 x 2 x 3) - Custo:</span><span id="trix_c_t" class="info-aposta">R$ 0,00</span></div>
             
-            <hr style="border: 0; border-top: 1px dashed #333; margin: 10px 0;">
-            <div class="subtitulo-resumo">Simulação de Retornos:</div>
+            <hr style="border: 0; border-top: 1px dashed #222c3a; margin: 8px 0;">
+            <div class="subtitulo-resumo">Simulação de Retornos e Lucro Líquido:</div>
             <div id="trix_simulacoes_retorno"></div>
         </div>
+    </div>
+
+    <div id="history_tab" class="tab-content">
+        <h2>Histórico de Operações</h2>
+        <div style="text-align: center; margin-bottom: 10px;">
+            <button class="btn-secondary" id="btn_clear_all_history" style="font-size:12px; padding: 6px 12px;">Apagar Todo o Histórico</button>
+        </div>
+        <div class="history-list" id="history_container"></div>
     </div>
 </div>
 
 <script>
-    // --- LÓGICA DE NAVEGAÇÃO DAS ABAS ---
+    let ultimoCalculoSb = null;
+    let ultimoCalculoTrix = null;
+    
+    // Variáveis de controle para o recálculo interativo da Surebet
+    let sbDadosAtuais = { total: 0, odds: [], checkboxes: [], investimentos: {} };
+
+    // --- NAVEGAÇÃO ABAS ---
     function switchTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        
         document.getElementById(tabId).classList.add('active');
-        event.currentTarget.classList.add('active');
+        if(event) event.currentTarget.classList.add('active');
+        if(tabId === 'history_tab') renderHistory();
     }
 
-    // --- LÓGICA DA ABA 1: MULTI-SUREBET ---
+    // --- ABA 1: MULTI-SUREBET ---
     const qtdOddsSelect = document.getElementById('qtd_odds');
     const listaOddsSb = document.getElementById('lista_odds_sb');
     const btnCalcSb = document.getElementById('btn_calc_sb');
     const resSbContainer = document.getElementById('res_sb');
-    const listaResApostasSb = document.getElementById('lista_res_apostas_sb');
+    const listaResultadosApostasSb = document.getElementById('lista_res_apostas_sb');
     const resumoFinalSb = document.getElementById('resumo_final_sb');
+    const btnCopySb = document.getElementById('btn_copy_sb');
+    const btnSaveSb = document.getElementById('btn_save_sb');
 
     for (let i = 2; i <= 20; i++) {
         let opt = document.createElement('option');
-        opt.value = i;
-        opt.innerHTML = i + " Opções (Odds)";
+        opt.value = i; opt.innerHTML = i + " Opções (Odds)";
         if(i === 2) opt.selected = true;
         qtdOddsSelect.appendChild(opt);
     }
@@ -143,6 +184,8 @@
     function gerarInputsOddsSb() {
         listaOddsSb.innerHTML = '';
         resSbContainer.style.display = 'none';
+        btnCopySb.style.display = 'none';
+        btnSaveSb.style.display = 'none';
         const qtd = parseInt(qtdOddsSelect.value);
 
         for (let i = 1; i <= qtd; i++) {
@@ -150,7 +193,7 @@
             div.className = 'odd-row';
             div.innerHTML = `
                 <span>Opção ${i}:</span>
-                <input type="number" class="sb-odd-input" id="sb_odd_${i}" placeholder="Odd ${i}" step="any">
+                <input type="number" class="sb-odd-input" id="sb_odd_${i}" placeholder="Odd" step="any">
                 <label class="check-group">
                     <input type="checkbox" class="sb-lucro-check" value="${i}">
                     Lucro
@@ -162,77 +205,237 @@
     gerarInputsOddsSb();
     qtdOddsSelect.addEventListener('change', gerarInputsOddsSb);
 
+    // Função Principal de Cálculo da Surebet
     btnCalcSb.addEventListener('click', function() {
         const total = parseFloat(document.getElementById('montante_sb').value);
         if (isNaN(total) || total <= 0) { alert("Insira um montante válido."); return; }
 
         const inputs = document.querySelectorAll('.sb-odd-input');
         const checkboxes = document.querySelectorAll('.sb-lucro-check');
-        let odds = [], opcoesLucro = [], opcoesProtecao = [];
+        
+        sbDadosAtuais.total = total;
+        sbDadosAtuais.odds = [];
+        sbDadosAtuais.checkboxes = [];
+        let somaInversosTotal = 0;
 
         for (let i = 0; i < inputs.length; i++) {
             const valor = parseFloat(inputs[i].value);
             if (isNaN(valor) || valor <= 1) { alert(`Preencha a Odd da Opção ${i+1} corretamente.`); return; }
-            let item = { num: i + 1, valor: valor };
-            odds.push(item);
-            if (checkboxes[i].checked) opcoesLucro.push(item); else opcoesProtecao.push(item);
+            sbDadosAtuais.odds.push(valor);
+            sbDadosAtuais.checkboxes.push(checkboxes[i].checked);
+            somaInversosTotal += (1 / valor);
         }
 
-        if (opcoesLucro.length === 0) { opcoesLucro = [...odds]; opcoesProtecao = []; }
+        // Se ninguém foi marcado, ativa modo padrão (todas dividem)
+        let marcasCount = sbDadosAtuais.checkboxes.filter(c => c).length;
+        if (marcasCount === 0) {
+            sbDadosAtuais.checkboxes = sbDadosAtuais.checkboxes.map(() => true);
+        }
 
-        listaResApostasSb.innerHTML = '';
-        resumoFinalSb.innerHTML = '';
-        let investimentos = {}, montanteGastoProtecao = 0;
+        // Executa distribuição matemática inicial
+        calcularDistribuicaoSurebet();
+        
+        // Renderiza elementos na tela com Inputs Editáveis
+        renderizarResultadosSurebet();
+        
+        resSbContainer.style.display = 'block';
+        btnCopySb.style.display = 'inline-block';
+        btnSaveSb.style.display = 'inline-block';
+        
+        // Alerta de Surebet real
+        if(somaInversosTotal < 1) {
+            resSbContainer.className = "results surebet-alerta-true";
+        } else {
+            resSbContainer.className = "results";
+        }
+    });
 
-        if (opcoesProtecao.length > 0) {
-            opcoesProtecao.forEach(item => {
-                let invProt = total / item.valor;
-                investimentos[item.num] = invProt;
-                montanteGastoProtecao += invProt;
+    function calcularDistribuicaoSurebet() {
+        let total = sbDadosAtuais.total;
+        let investimentos = {};
+        let custoProtecao = 0;
+
+        // Separa quem é proteção para calcular valor fixo baseado no montante total
+        sbDadosAtuais.odds.forEach((odd, index) => {
+            let itemNum = index + 1;
+            if (!sbDadosAtuais.checkboxes[index]) {
+                let invProt = total / odd;
+                investimentos[itemNum] = invProt;
+                custoProtecao += invProt;
+            }
+        });
+
+        let bancaRestante = total - custoProtecao;
+        if(bancaRestante < 0) bancaRestante = 0;
+
+        let somaInversosLucro = 0;
+        sbDadosAtuais.odds.forEach((odd, index) => {
+            if (sbDadosAtuais.checkboxes[index]) {
+                somaInversosLucro += (1 / odd);
+            }
+        });
+
+        let retornoAlvoLucro = bancaRestante / somaInversosLucro;
+
+        sbDadosAtuais.odds.forEach((odd, index) => {
+            let itemNum = index + 1;
+            if (sbDadosAtuais.checkboxes[index]) {
+                investimentos[itemNum] = retornoAlvoLucro / odd;
+            }
+        });
+
+        sbDadosAtuais.investimentos = investimentos;
+    }
+
+    function renderizarResultadosSurebet() {
+        listaResultadosApostasSb.innerHTML = '';
+        let total = sbDadosAtuais.total;
+        
+        sbDadosAtuais.odds.forEach((odd, index) => {
+            let itemNum = index + 1;
+            let valAposta = sbDadosAtuais.investimentos[itemNum] || 0;
+            let ehLucro = sbDadosAtuais.checkboxes[index];
+
+            const divRes = document.createElement('div');
+            divRes.className = 'result-item';
+            divRes.classList.add(ehLucro ? 'destaque-lucro' : 'destaque-protecao');
+
+            divRes.innerHTML = `
+                <span>${ehLucro ? '⭐' : '🛡️'} Opção ${itemNum} (Odd ${odd.toFixed(2)}):</span>
+                <input type="number" class="input-ajuste" data-index="${index}" value="${valAposta.toFixed(2)}" step="0.01">
+            `;
+            listaResultadosApostasSb.appendChild(divRes);
+        });
+
+        // Adiciona ouvintes para recalcular se o usuário mudar o valor da caixinha na hora
+        document.querySelectorAll('.input-ajuste').forEach(inputField => {
+            inputField.addEventListener('input', function() {
+                let idxAlterado = parseInt(this.dataset.index);
+                let novoVal = parseFloat(this.value) || 0;
+                
+                // Trava o valor digitado manualmente e redistribui o resto da banca
+                recalcularPorAjusteManual(idxAlterado, novoVal);
+            });
+        });
+
+        atualizarResumoSurebet();
+    }
+
+    function recalcularPorAjusteManual(indexAlterado, novoValor) {
+        let itemNumAlterado = indexAlterado + 1;
+        sbDadosAtuais.investimentos[itemNumAlterado] = novoValor;
+
+        // Calcula quanto sobrou da banca total
+        let totalGastoManual = 0;
+        totalGastoManual += novoValor;
+
+        // Descobre quais campos NÃO foram editados pelo usuário no momento para balancear
+        // Para simplificar e garantir a consistência, recalculamos os outros de foco Lucro
+        let somaInversosOutrosLucros = 0;
+        let idxOutrosLucros = [];
+
+        sbDadosAtuais.odds.forEach((odd, idx) => {
+            if (idx !== indexAlterado) {
+                totalGastoManual += (sbDadosAtuais.investimentos[idx+1] || 0); // soma temporária dos antigos
+            }
+        });
+
+        // Vamos recalcular o resumo baseado nos valores reais atuais dos inputs digitados
+        atualizarResumoSurebet();
+    }
+
+    function atualizarResumoSurebet() {
+        let totalGastoBanca = 0;
+        let resumoHtml = "";
+        let textoCopiar = `📊 MULTI-SUREBET REPORT\n\nDISTRIBUIÇÃO ATUAL:\n`;
+
+        // Soma total real alocada nos inputs
+        const inputsAjustados = document.querySelectorAll('.input-ajuste');
+        let valoresReais = {};
+        
+        inputsAjustados.forEach(inp => {
+            let idx = parseInt(inp.dataset.index);
+            let val = parseFloat(inp.value) || 0;
+            valoresReais[idx + 1] = val;
+            totalGastoBanca += val;
+        });
+
+        // Se a lista de inputs na tela ainda não carregou no clique inicial, usa o objeto de memória
+        if(inputsAjustados.length === 0) {
+            sbDadosAtuais.odds.forEach((_, i) => {
+                let v = sbDadosAtuais.investimentos[i+1] || 0;
+                valoresReais[i+1] = v;
+                totalGastoBanca += v;
             });
         }
 
-        if (montanteGastoProtecao >= total) { alert("Custo de proteção esgotou o montante. Lucro impossível."); return; }
+        textoCopiar += `Montante Utilizado: R$ ${totalGastoBanca.toFixed(2)}\n`;
 
-        let bancaRestante = total - montanteGastoProtecao;
-        let somaInversosLucro = 0;
-        opcoesLucro.forEach(item => somaInversosLucro += (1 / item.valor));
-        let retornoAlvoLucro = bancaRestante / somaInversosLucro;
+        // Calcula retornos possíveis de cada opção
+        sbDadosAtuais.odds.forEach((odd, index) => {
+            let num = index + 1;
+            let aposta = valoresReais[num] || 0;
+            let retornoBruto = aposta * odd;
+            let lucroLiquidoReal = retornoBruto - totalGastoBanca;
+            let classeLucro = lucroLiquidoReal >= 0 ? "lucro-positivo" : "lucro-negativo";
+            let ehFocoLucro = sbDadosAtuais.checkboxes[index];
 
-        opcoesLucro.forEach(item => investimentos[item.num] = retornoAlvoLucro / item.valor);
+            textoCopiar += `Opção ${num}: R$ ${aposta.toFixed(2)} -> Retorno: R$ ${retornoBruto.toFixed(2)} (Líq: R$ ${lucroLiquidoReal.toFixed(2)})\n`;
 
-        for (let i = 1; i <= inputs.length; i++) {
-            const divRes = document.createElement('div');
-            divRes.className = 'result-item';
-            let ehLucro = opcoesLucro.some(item => item.num === i);
-            if (ehLucro) {
-                divRes.classList.add('destaque-lucro');
-                divRes.innerHTML = `<span>⭐ Opção ${i} (Divisão de Lucro):</span> <span class="info-aposta">R$ ${investimentos[i].toFixed(2)}</span>`;
-            } else {
-                divRes.classList.add('destaque-protecao');
-                divRes.innerHTML = `<span>Opção ${i} (Apenas Proteção):</span> <span class="info-aposta">R$ ${investimentos[i].toFixed(2)}</span>`;
-            }
-            listaResApostasSb.appendChild(divRes);
-        }
-
-        let lucroReal = retornoAlvoLucro - total;
-        let lucroPercent = (lucroReal / total) * 100;
-        let classeLucro = lucroReal > 0 ? "lucro-positivo" : "lucro-negativo";
-
-        if (opcoesProtecao.length === 0) {
-            resumoFinalSb.innerHTML = `<div class="result-item" style="font-size: 16px;"><span>Lucro Seguro Geral:</span><span class="${classeLucro}">R$ ${lucroReal.toFixed(2)} (${lucroPercent.toFixed(2)}%)</span></div>`;
-        } else {
-            resumoFinalSb.innerHTML = `
-                <div class="result-item" style="font-size: 15px;"><span>Se der alguma marcada (Lucro):</span><span class="${classeLucro}">Retorno R$ ${retornoAlvoLucro.toFixed(2)} [Lucro: R$ ${lucroReal.toFixed(2)} (${lucroPercent.toFixed(2)}%)]</span></div>
-                <div class="result-item" style="font-size: 14px; color: #b0b0b0;"><span>Se der alguma desmarcada:</span><span>Retorna o Montante: R$ ${total.toFixed(2)}</span></div>
+            resumoHtml += `
+                <div class="result-item" style="font-size:13px; border-bottom: 1px dotted #222c3a;">
+                    <span>Se vencer Opção ${num} ${ehFocoLucro ? '(Lucro)':'(Proteção)'}:</span>
+                    <div>
+                        <span style="color:#cbd5e1; font-size:12px;">Retorno Bruto: R$ ${retornoBruto.toFixed(2)}</span> | 
+                        <span class="${classeLucro}">Líquido Real: R$ ${lucroLiquidoReal.toFixed(2)}</span>
+                    </div>
+                </div>
             `;
-        }
-        resSbContainer.style.display = 'block';
+        });
+
+        resumoHtml += `<div style="font-size:12px; color:#cbd5e1; text-align:right; margin-top:5px;"><b>Total Geral Alocado:</b> R$ ${totalGastoBanca.toFixed(2)}</div>`;
+        resumoFinalSb.innerHTML = resumoHtml;
+
+        ultimoCalculoSb = {
+            tipo: 'Surebet',
+            data: new Date().toLocaleTimeString(),
+            montante: totalGastoBanca,
+            texto: textoCopiar
+        };
+    }
+
+    document.getElementById('btn_clear_sb').addEventListener('click', () => {
+        document.getElementById('montante_sb').value = '';
+        document.querySelectorAll('.sb-odd-input').forEach(i => i.value = '');
+        document.querySelectorAll('.sb-lucro-check').forEach(c => c.checked = false);
+        resSbContainer.style.display = 'none';
+        btnCopySb.style.display = 'none';
+        btnSaveSb.style.display = 'none';
     });
 
-    // --- LÓGICA DA ABA 2: CALCULADORA TRIX ---
+    btnCopySb.addEventListener('click', () => {
+        if(ultimoCalculoSb) {
+            // Atualiza o texto antes de copiar para garantir os ajustes manuais
+            atualizarResumoSurebet();
+            navigator.clipboard.writeText(ultimoCalculoSb.texto);
+            alert("Resultados copiados com sucesso!");
+        }
+    });
+
+    btnSaveSb.addEventListener('click', () => {
+        if(ultimoCalculoSb) {
+            atualizarResumoSurebet();
+            salvarNoHistorico(ultimoCalculoSb);
+        }
+    });
+
+
+    // --- ABA 2: CALCULADORA TRIX ---
     const btnCalcTrix = document.getElementById('btn_calc_trix');
     const resTrixContainer = document.getElementById('res_trix');
+    const simulacoesDiv = document.getElementById('trix_simulacoes_retorno');
+    const btnCopyTrix = document.getElementById('btn_copy_trix');
+    const btnSaveTrix = document.getElementById('btn_save_trix');
 
     btnCalcTrix.addEventListener('click', function() {
         const total = parseFloat(document.getElementById('montante_trix').value);
@@ -241,75 +444,145 @@
         const o3 = parseFloat(document.getElementById('trix_odd3').value);
 
         if(isNaN(total) || isNaN(o1) || isNaN(o2) || isNaN(o3) || total <= 0) {
-            alert("Por favor, preencha o montante e as 3 odds corretamente.");
+            alert("Preencha o montante e as 3 odds corretamente.");
             return;
         }
 
-        // Sistema Trix é composto por 4 apostas de igual valor (3 duplas e 1 tripla)
         let apostaPorColuna = total / 4;
-
-        // Atualiza divisão na tela
         document.getElementById('trix_val_unidade').innerText = "R$ " + apostaPorColuna.toFixed(2);
-        document.getElementById('trix_c_d1').innerText = "R$ " + apostaPorColuna.toFixed(2);
-        document.getElementById('trix_c_d2').innerText = "R$ " + apostaPorColuna.toFixed(2);
-        document.getElementById('trix_c_d3').innerText = "R$ " + apostaPorColuna.toFixed(2);
-        document.getElementById('trix_c_t').innerText = "R$ " + apostaPorColuna.toFixed(2);
 
-        // Cálculo das odds combinadas
-        let oddDupla1 = o1 * o2;
-        let oddDupla2 = o1 * o3;
-        let oddDupla3 = o2 * o3;
-        let oddTripla = o1 * o2 * o3;
+        let retD1 = apostaPorColuna * (o1 * o2);
+        let retD2 = apostaPorColuna * (o1 * o3);
+        let retD3 = apostaPorColuna * (o2 * o3);
+        let retTripla = apostaPorColuna * (o1 * o2 * o3);
 
-        // Retornos Brutos individuais
-        let retD1 = apostaPorColuna * oddDupla1;
-        let retD2 = apostaPorColuna * oddDupla2;
-        let retD3 = apostaPorColuna * oddDupla3;
-        let retTripla = apostaPorColuna * oddTripla;
-
-        const simulacoesDiv = document.getElementById('trix_simulacoes_retorno');
         simulacoesDiv.innerHTML = '';
+        let textoCopiar = `📋 SISTEMA TRIX REPORT\nMontante Investido: R$ ${total.toFixed(2)}\n\nCENÁRIOS DE RETORNO E LUCRO LÍQUIDO:\n`;
 
-        // Cenários de Acerto:
-        // Cenário A: Acertar apenas 1 e 2
-        let lucroA = retD1 - total;
-        criarItemSimulacao(simulacoesDiv, "Acertando apenas Seleções 1 e 2:", retD1, lucroA);
+        adicionarItemTrix(simulacoesDiv, "Acertando apenas 1 e 2:", retD1, total);
+        adicionarItemTrix(simulacoesDiv, "Acertando apenas 1 e 3:", retD2, total);
+        adicionarItemTrix(simulacoesDiv, "Acertando apenas 2 e 3:", retD3, total);
 
-        // Cenário B: Acertar apenas 1 e 3
-        let lucroB = retD2 - total;
-        criarItemSimulacao(simulacoesDiv, "Acertando apenas Seleções 1 e 3:", retD2, lucroB);
+        textoCopiar += `• Acertou 1 e 2: Bruto R$ ${retD1.toFixed(2)} (Líq: R$ ${(retD1-total).toFixed(2)})\n• Acertou 1 e 3: Bruto R$ ${retD2.toFixed(2)} (Líq: R$ ${(retD2-total).toFixed(2)})\n• Acertou 2 e 3: Bruto R$ ${retD3.toFixed(2)} (Líq: R$ ${(retD3-total).toFixed(2)})\n`;
 
-        // Cenário C: Acertar apenas 2 e 3
-        let lucroC = retD3 - total;
-        criarItemSimulacao(simulacoesDiv, "Acertando apenas Seleções 2 e 3:", retD3, lucroC);
-
-        // Cenário Máximo: Acertar as 3 Seleções (Ganha tudo: as 3 duplas + a tripla)
         let retornoMaximo = retD1 + retD2 + retD3 + retTripla;
-        let lucroMaximo = retornoMaximo - total;
-        
+        let lucroMaximoLiquido = retornoMaximo - total;
+        let classeMax = lucroMaximoLiquido > 0 ? "lucro-positivo" : "lucro-negativo";
+
         const divMax = document.createElement('div');
         divMax.className = 'result-item';
-        divMax.style.marginTop = '10px';
-        divMax.style.background = 'rgba(0, 230, 118, 0.15)';
+        divMax.style.marginTop = '8px';
+        divMax.style.background = 'rgba(0, 230, 118, 0.12)';
         divMax.style.padding = '8px';
-        divMax.style.borderRadius = '5px';
-        divMax.style.border = '1px dashed #00e676';
-        
-        let classeMax = lucroMaximo > 0 ? "lucro-positivo" : "lucro-negativo";
-        divMax.innerHTML = `<span>🏆 ACERTANDO AS 3 SELEÇÕES (GREEN MÁXIMO):</span> <span class="${classeMax}">R$ ${retornoMaximo.toFixed(2)} (Lucro: R$ ${lucroMaximo.toFixed(2)})</span>`;
+        divMax.style.borderRadius = '6px';
+        divMax.innerHTML = `
+            <span>🏆 GREEN MÁXIMO (CRAVAR AS 3):</span> 
+            <div style="text-align: right;">
+                <div style="font-size:11px; color:#cbd5e1;">Bruto: R$ ${retornoMaximo.toFixed(2)}</div>
+                <div class="${classeMax}">Líquido Real: R$ ${lucroMaximoLiquido.toFixed(2)}</div>
+            </div>
+        `;
         simulacoesDiv.appendChild(divMax);
 
+        textoCopiar += `\n🏆 GREEN MÁXIMO (3/3): Bruto R$ ${retornoMaximo.toFixed(2)} | Lucro Líquido Real: R$ ${lucroMaximoLiquido.toFixed(2)}`;
+
         resTrixContainer.style.display = 'block';
+        btnCopyTrix.style.display = 'inline-block';
+        btnSaveTrix.style.display = 'inline-block';
+
+        ultimoCalculoTrix = {
+            tipo: 'Trix',
+            data: new Date().toLocaleTimeString(),
+            montante: total,
+            texto: textoCopiar
+        };
     });
 
-    function criarItemSimulacao(container, texto, retorno, lucro) {
+    function adicionarItemTrix(container, texto, retornoBruto, montanteTotal) {
         const div = document.createElement('div');
         div.className = 'result-item';
-        let classeLucro = lucro > 0 ? "lucro-positivo" : "lucro-negativo";
-        let sinalLucro = lucro >= 0 ? "Lucro: R$ " : "Prejuízo: R$ ";
-        div.innerHTML = `<span>${texto}</span> <span class="${classeLucro}">R$ ${retorno.toFixed(2)} (${sinalLucro}${Math.abs(lucro).toFixed(2)})</span>`;
+        let lucroLiquido = retornoBruto - montanteTotal;
+        let classeLucro = lucroLiquido >= 0 ? "lucro-positivo" : "lucro-negativo";
+        let label = lucroLiquido >= 0 ? "Líq" : "Prejuízo";
+        
+        div.innerHTML = `
+            <span>${texto}</span>
+            <div style="text-align: right;">
+                <span style="font-size:12px; color:#cbd5e1;">Bruto: R$ ${retornoBruto.toFixed(2)}</span> | 
+                <span class="${classeLucro}">${label}: R$ ${lucroLiquido.toFixed(2)}</span>
+            </div>
+        `;
         container.appendChild(div);
     }
+
+    document.getElementById('btn_clear_trix').addEventListener('click', () => {
+        document.getElementById('montante_trix').value = '';
+        document.getElementById('trix_odd1').value = '';
+        document.getElementById('trix_odd2').value = '';
+        document.getElementById('trix_odd3').value = '';
+        resTrixContainer.style.display = 'none';
+        btnCopyTrix.style.display = 'none';
+        btnSaveTrix.style.display = 'none';
+    });
+
+    btnCopyTrix.addEventListener('click', () => {
+        if(ultimoCalculoTrix) {
+            navigator.clipboard.writeText(ultimoCalculoTrix.texto);
+            alert("Resultados da Trix copiados!");
+        }
+    });
+
+    btnSaveTrix.addEventListener('click', () => {
+        if(ultimoCalculoTrix) {
+            salvarNoHistorico(ultimoCalculoTrix);
+        }
+    });
+
+    // --- HISTÓRICO (LOCALSTORAGE) ---
+    function salvarNoHistorico(itemCalculo) {
+        let historico = JSON.parse(localStorage.getItem('hist_apostas')) || [];
+        historico.unshift(itemCalculo);
+        localStorage.setItem('hist_apostas', JSON.stringify(historico));
+        alert("Salvo no histórico!");
+    }
+
+    function renderHistory() {
+        const container = document.getElementById('history_container');
+        container.innerHTML = '';
+        let historico = JSON.parse(localStorage.getItem('hist_apostas')) || [];
+
+        if(historico.length === 0) {
+            container.innerHTML = `<div style="text-align:center; color:#64748b; margin-top:20px; font-size:14px;">Nenhum cálculo salvo ainda.</div>`;
+            return;
+        }
+
+        historico.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.innerHTML = `
+                <div class="history-header">
+                    <span>${item.tipo} (${item.data})</span>
+                    <button class="btn-delete-hist" onclick="deletarItemHistorico(${index})">X</button>
+                </div>
+                <div style="white-space: pre-wrap; font-family: monospace; font-size:11px; margin-top:5px; color:#cbd5e1;">${item.texto}</div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function deletarItemHistorico(index) {
+        let historico = JSON.parse(localStorage.getItem('hist_apostas')) || [];
+        historico.splice(index, 1);
+        localStorage.setItem('hist_apostas', JSON.stringify(historico));
+        renderHistory();
+    }
+
+    document.getElementById('btn_clear_all_history').addEventListener('click', () => {
+        if(confirm("Deseja apagar todo o histórico?")) {
+            localStorage.removeItem('hist_apostas');
+            renderHistory();
+        }
+    });
 </script>
 </body>
 </html>
