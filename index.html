@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Surebet & Trix Pro Calculator v2</title>
+    <title>Surebet & Trix Pro Calculator v4</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0c0f12; color: #e2e8f0; padding: 12px; display: flex; flex-direction: column; align-items: center; }
@@ -41,14 +41,13 @@
         .surebet-alerta-true { border: 1px solid #eab308; background: linear-gradient(135deg, #1c2330 0%, #232215 100%); }
         .result-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #222c3a; font-size: 14px; }
         .result-item:last-child { border-bottom: none; }
-        .result-item span:last-child { font-weight: bold; }
         
         /* Inputs de ajuste manual */
         .input-ajuste { width: 90px; padding: 6px; border-radius: 6px; background: #151a22; border: 1px solid #3b485d; color: #00e676; font-weight: bold; text-align: right; font-size: 14px; }
         .input-ajuste:focus { border-color: #00e676; }
 
-        .lucro-positivo { color: #00e676; font-size: 16px; font-weight: bold; }
-        .lucro-negativo { color: #f43f5e; font-size: 16px; font-weight: bold; }
+        .lucro-positivo { color: #00e676; font-weight: bold; }
+        .lucro-negativo { color: #f43f5e; font-weight: bold; }
         .info-aposta { color: #ffffff; }
         .destaque-lucro { background: rgba(0, 230, 118, 0.08); padding: 4px 6px; border-radius: 4px; border-left: 3px solid #00e676; }
         .destaque-protecao { background: rgba(255, 255, 255, 0.02); padding: 4px 6px; border-radius: 4px; border-left: 3px solid #64748b; }
@@ -92,7 +91,7 @@
 
         <button class="btn-calc" id="btn_calc_sb">Calcular Surebet</button>
         <div class="action-row">
-            <button class="btn-secondary" id="btn_clear_sb">Limpar</button>
+            <button class="btn-secondary" id="btn_clear_sb">Limpar Tudo</button>
             <button class="btn-secondary" id="btn_copy_sb" style="display:none;">Copiar Texto</button>
             <button class="btn-secondary" id="btn_save_sb" style="display:none;">Salvar</button>
         </div>
@@ -110,7 +109,7 @@
     <div id="trix_tab" class="tab-content">
         <h2>Calculadora de Sistema Trix</h2>
         <div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px; text-align: center;">
-            Insira 3独立 seleções. O montante será dividido igualmente em 4 colunas (3 Duplas e 1 Tripla).
+            Insira 3 seleções. O montante será dividido igualmente em 4 colunas (3 Duplas e 1 Tripla).
         </div>
 
         <div class="input-group">
@@ -151,8 +150,6 @@
 <script>
     let ultimoCalculoSb = null;
     let ultimoCalculoTrix = null;
-    
-    // Variáveis de controle para o recálculo interativo da Surebet
     let sbDadosAtuais = { total: 0, odds: [], checkboxes: [], investimentos: {} };
 
     // --- NAVEGAÇÃO ABAS ---
@@ -181,31 +178,53 @@
         qtdOddsSelect.appendChild(opt);
     }
 
-    function gerarInputsOddsSb() {
-        listaOddsSb.innerHTML = '';
-        resSbContainer.style.display = 'none';
-        btnCopySb.style.display = 'none';
-        btnSaveSb.style.display = 'none';
-        const qtd = parseInt(qtdOddsSelect.value);
+    // NOVA FUNÇÃO INTELIGENTE: Altera a quantidade mantendo os dados antigos intactos
+    function ajustarQuantidadeInputsOddsSb() {
+        const novaQtd = parseInt(qtdOddsSelect.value);
+        
+        // Captura os valores que já estão digitados na tela atualmente
+        let valoresAntigos = [];
+        let checksAntigos = [];
+        const inputsExistentes = document.querySelectorAll('.sb-odd-input');
+        const checksExistentes = document.querySelectorAll('.sb-lucro-check');
 
-        for (let i = 1; i <= qtd; i++) {
+        for (let i = 0; i < inputsExistentes.length; i++) {
+            valoresAntigos.push(inputsExistentes[i].value || "");
+            checksAntigos.push(checksExistentes[i].checked || false);
+        }
+
+        // Reconstrói a lista sem apagar os dados coletados
+        listaOddsSb.innerHTML = '';
+        
+        for (let i = 1; i <= novaQtd; i++) {
             const div = document.createElement('div');
             div.className = 'odd-row';
+            
+            // Verifica se já existia dado digitado para esse índice (i-1)
+            let valorInput = (i <= valoresAntigos.length) ? valoresAntigos[i - 1] : "";
+            let marcadoCheck = (i <= checksAntigos.length) ? checksAntigos[i - 1] : false;
+
             div.innerHTML = `
                 <span>Opção ${i}:</span>
-                <input type="number" class="sb-odd-input" id="sb_odd_${i}" placeholder="Odd" step="any">
+                <input type="number" class="sb-odd-input" id="sb_odd_${i}" placeholder="Odd" step="any" value="${valorInput}">
                 <label class="check-group">
-                    <input type="checkbox" class="sb-lucro-check" value="${i}">
+                    <input type="checkbox" class="sb-lucro-check" value="${i}" ${marcadoCheck ? 'checked' : ''}>
                     Lucro
                 </label>
             `;
             listaOddsSb.appendChild(div);
         }
+        
+        // Oculta os resultados antigos se houver alteração de tamanho para evitar dados inconsistentes na tela antes do novo clique
+        resSbContainer.style.display = 'none';
+        btnCopySb.style.display = 'none';
+        btnSaveSb.style.display = 'none';
     }
-    gerarInputsOddsSb();
-    qtdOddsSelect.addEventListener('change', gerarInputsOddsSb);
+    
+    // Inicialização padrão
+    ajustarQuantidadeInputsOddsSb();
+    qtdOddsSelect.addEventListener('change', ajustarQuantidadeInputsOddsSb);
 
-    // Função Principal de Cálculo da Surebet
     btnCalcSb.addEventListener('click', function() {
         const total = parseFloat(document.getElementById('montante_sb').value);
         if (isNaN(total) || total <= 0) { alert("Insira um montante válido."); return; }
@@ -226,23 +245,18 @@
             somaInversosTotal += (1 / valor);
         }
 
-        // Se ninguém foi marcado, ativa modo padrão (todas dividem)
         let marcasCount = sbDadosAtuais.checkboxes.filter(c => c).length;
         if (marcasCount === 0) {
             sbDadosAtuais.checkboxes = sbDadosAtuais.checkboxes.map(() => true);
         }
 
-        // Executa distribuição matemática inicial
         calcularDistribuicaoSurebet();
-        
-        // Renderiza elementos na tela com Inputs Editáveis
         renderizarResultadosSurebet();
         
         resSbContainer.style.display = 'block';
         btnCopySb.style.display = 'inline-block';
         btnSaveSb.style.display = 'inline-block';
         
-        // Alerta de Surebet real
         if(somaInversosTotal < 1) {
             resSbContainer.className = "results surebet-alerta-true";
         } else {
@@ -255,7 +269,6 @@
         let investimentos = {};
         let custoProtecao = 0;
 
-        // Separa quem é proteção para calcular valor fixo baseado no montante total
         sbDadosAtuais.odds.forEach((odd, index) => {
             let itemNum = index + 1;
             if (!sbDadosAtuais.checkboxes[index]) {
@@ -289,8 +302,6 @@
 
     function renderizarResultadosSurebet() {
         listaResultadosApostasSb.innerHTML = '';
-        let total = sbDadosAtuais.total;
-        
         sbDadosAtuais.odds.forEach((odd, index) => {
             let itemNum = index + 1;
             let valAposta = sbDadosAtuais.investimentos[itemNum] || 0;
@@ -307,40 +318,15 @@
             listaResultadosApostasSb.appendChild(divRes);
         });
 
-        // Adiciona ouvintes para recalcular se o usuário mudar o valor da caixinha na hora
         document.querySelectorAll('.input-ajuste').forEach(inputField => {
             inputField.addEventListener('input', function() {
                 let idxAlterado = parseInt(this.dataset.index);
                 let novoVal = parseFloat(this.value) || 0;
-                
-                // Trava o valor digitado manualmente e redistribui o resto da banca
-                recalcularPorAjusteManual(idxAlterado, novoVal);
+                sbDadosAtuais.investimentos[idxAlterado + 1] = novoVal;
+                atualizarResumoSurebet();
             });
         });
 
-        atualizarResumoSurebet();
-    }
-
-    function recalcularPorAjusteManual(indexAlterado, novoValor) {
-        let itemNumAlterado = indexAlterado + 1;
-        sbDadosAtuais.investimentos[itemNumAlterado] = novoValor;
-
-        // Calcula quanto sobrou da banca total
-        let totalGastoManual = 0;
-        totalGastoManual += novoValor;
-
-        // Descobre quais campos NÃO foram editados pelo usuário no momento para balancear
-        // Para simplificar e garantir a consistência, recalculamos os outros de foco Lucro
-        let somaInversosOutrosLucros = 0;
-        let idxOutrosLucros = [];
-
-        sbDadosAtuais.odds.forEach((odd, idx) => {
-            if (idx !== indexAlterado) {
-                totalGastoManual += (sbDadosAtuais.investimentos[idx+1] || 0); // soma temporária dos antigos
-            }
-        });
-
-        // Vamos recalcular o resumo baseado nos valores reais atuais dos inputs digitados
         atualizarResumoSurebet();
     }
 
@@ -349,7 +335,6 @@
         let resumoHtml = "";
         let textoCopiar = `📊 MULTI-SUREBET REPORT\n\nDISTRIBUIÇÃO ATUAL:\n`;
 
-        // Soma total real alocada nos inputs
         const inputsAjustados = document.querySelectorAll('.input-ajuste');
         let valoresReais = {};
         
@@ -360,7 +345,6 @@
             totalGastoBanca += val;
         });
 
-        // Se a lista de inputs na tela ainda não carregou no clique inicial, usa o objeto de memória
         if(inputsAjustados.length === 0) {
             sbDadosAtuais.odds.forEach((_, i) => {
                 let v = sbDadosAtuais.investimentos[i+1] || 0;
@@ -371,23 +355,29 @@
 
         textoCopiar += `Montante Utilizado: R$ ${totalGastoBanca.toFixed(2)}\n`;
 
-        // Calcula retornos possíveis de cada opção
         sbDadosAtuais.odds.forEach((odd, index) => {
             let num = index + 1;
             let aposta = valoresReais[num] || 0;
             let retornoBruto = aposta * odd;
             let lucroLiquidoReal = retornoBruto - totalGastoBanca;
+            
+            let porcentagemLucro = 0;
+            if (totalGastoBanca > 0) {
+                porcentagemLucro = (lucroLiquidoReal / totalGastoBanca) * 100;
+            }
+            
             let classeLucro = lucroLiquidoReal >= 0 ? "lucro-positivo" : "lucro-negativo";
+            let sinalSímbolo = lucroLiquidoReal >= 0 ? "+" : "";
             let ehFocoLucro = sbDadosAtuais.checkboxes[index];
 
-            textoCopiar += `Opção ${num}: R$ ${aposta.toFixed(2)} -> Retorno: R$ ${retornoBruto.toFixed(2)} (Líq: R$ ${lucroLiquidoReal.toFixed(2)})\n`;
+            textoCopiar += `Opção ${num}: R$ ${aposta.toFixed(2)} -> Retorno: R$ ${retornoBruto.toFixed(2)} (Líq: R$ ${lucroLiquidoReal.toFixed(2)} | ${sinalSímbolo}${porcentagemLucro.toFixed(2)}%)\n`;
 
             resumoHtml += `
                 <div class="result-item" style="font-size:13px; border-bottom: 1px dotted #222c3a;">
                     <span>Se vencer Opção ${num} ${ehFocoLucro ? '(Lucro)':'(Proteção)'}:</span>
-                    <div>
+                    <div style="text-align: right;">
                         <span style="color:#cbd5e1; font-size:12px;">Retorno Bruto: R$ ${retornoBruto.toFixed(2)}</span> | 
-                        <span class="${classeLucro}">Líquido Real: R$ ${lucroLiquidoReal.toFixed(2)}</span>
+                        <span class="${classeLucro}">Líquido: R$ ${lucroLiquidoReal.toFixed(2)} (${sinalSímbolo}${porcentagemLucro.toFixed(2)}%)</span>
                     </div>
                 </div>
             `;
@@ -415,7 +405,6 @@
 
     btnCopySb.addEventListener('click', () => {
         if(ultimoCalculoSb) {
-            // Atualiza o texto antes de copiar para garantir os ajustes manuais
             atualizarResumoSurebet();
             navigator.clipboard.writeText(ultimoCalculoSb.texto);
             alert("Resultados copiados com sucesso!");
@@ -428,7 +417,6 @@
             salvarNoHistorico(ultimoCalculoSb);
         }
     });
-
 
     // --- ABA 2: CALCULADORA TRIX ---
     const btnCalcTrix = document.getElementById('btn_calc_trix');
@@ -463,10 +451,15 @@
         adicionarItemTrix(simulacoesDiv, "Acertando apenas 1 e 3:", retD2, total);
         adicionarItemTrix(simulacoesDiv, "Acertando apenas 2 e 3:", retD3, total);
 
-        textoCopiar += `• Acertou 1 e 2: Bruto R$ ${retD1.toFixed(2)} (Líq: R$ ${(retD1-total).toFixed(2)})\n• Acertou 1 e 3: Bruto R$ ${retD2.toFixed(2)} (Líq: R$ ${(retD2-total).toFixed(2)})\n• Acertou 2 e 3: Bruto R$ ${retD3.toFixed(2)} (Líq: R$ ${(retD3-total).toFixed(2)})\n`;
+        let pctD1 = ((retD1 - total) / total) * 100;
+        let pctD2 = ((retD2 - total) / total) * 100;
+        let pctD3 = ((retD3 - total) / total) * 100;
+
+        textoCopiar += `• Acertou 1 e 2: Bruto R$ ${retD1.toFixed(2)} | Líq: R$ ${(retD1-total).toFixed(2)} (${pctD1.toFixed(2)}%)\n• Acertou 1 e 3: Bruto R$ ${retD2.toFixed(2)} | Líq: R$ ${(retD2-total).toFixed(2)} (${pctD2.toFixed(2)}%)\n• Acertou 2 e 3: Bruto R$ ${retD3.toFixed(2)} | Líq: R$ ${(retD3-total).toFixed(2)} (${pctD3.toFixed(2)}%)\n`;
 
         let retornoMaximo = retD1 + retD2 + retD3 + retTripla;
         let lucroMaximoLiquido = retornoMaximo - total;
+        let pctMax = (lucroMaximoLiquido / total) * 100;
         let classeMax = lucroMaximoLiquido > 0 ? "lucro-positivo" : "lucro-negativo";
 
         const divMax = document.createElement('div');
@@ -479,12 +472,12 @@
             <span>🏆 GREEN MÁXIMO (CRAVAR AS 3):</span> 
             <div style="text-align: right;">
                 <div style="font-size:11px; color:#cbd5e1;">Bruto: R$ ${retornoMaximo.toFixed(2)}</div>
-                <div class="${classeMax}">Líquido Real: R$ ${lucroMaximoLiquido.toFixed(2)}</div>
+                <div class="${classeMax}">Líquido: R$ ${lucroMaximoLiquido.toFixed(2)} (+${pctMax.toFixed(2)}%)</div>
             </div>
         `;
         simulacoesDiv.appendChild(divMax);
 
-        textoCopiar += `\n🏆 GREEN MÁXIMO (3/3): Bruto R$ ${retornoMaximo.toFixed(2)} | Lucro Líquido Real: R$ ${lucroMaximoLiquido.toFixed(2)}`;
+        textoCopiar += `\n🏆 GREEN MÁXIMO (3/3): Bruto R$ ${retornoMaximo.toFixed(2)} | Lucro Líquido Real: R$ ${lucroMaximoLiquido.toFixed(2)} (+${pctMax.toFixed(2)}%)`;
 
         resTrixContainer.style.display = 'block';
         btnCopyTrix.style.display = 'inline-block';
@@ -502,14 +495,16 @@
         const div = document.createElement('div');
         div.className = 'result-item';
         let lucroLiquido = retornoBruto - montanteTotal;
+        let porcentagem = (lucroLiquido / montanteTotal) * 100;
         let classeLucro = lucroLiquido >= 0 ? "lucro-positivo" : "lucro-negativo";
         let label = lucroLiquido >= 0 ? "Líq" : "Prejuízo";
+        let sinal = lucroLiquido >= 0 ? "+" : "";
         
         div.innerHTML = `
             <span>${texto}</span>
             <div style="text-align: right;">
                 <span style="font-size:12px; color:#cbd5e1;">Bruto: R$ ${retornoBruto.toFixed(2)}</span> | 
-                <span class="${classeLucro}">${label}: R$ ${lucroLiquido.toFixed(2)}</span>
+                <span class="${classeLucro}">${label}: R$ ${lucroLiquido.toFixed(2)} (${sinal}${porcentagem.toFixed(2)}%)</span>
             </div>
         `;
         container.appendChild(div);
@@ -538,7 +533,7 @@
         }
     });
 
-    // --- HISTÓRICO (LOCALSTORAGE) ---
+    // --- HISTÓRICO ---
     function salvarNoHistorico(itemCalculo) {
         let historico = JSON.parse(localStorage.getItem('hist_apostas')) || [];
         historico.unshift(itemCalculo);
